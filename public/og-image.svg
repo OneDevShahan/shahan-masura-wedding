@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0f2f2a"/>
+      <stop offset="60%" stop-color="#183d36"/>
+      <stop offset="100%" stop-color="#d8b36c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="1030" cy="120" r="70" fill="#f0d39f" opacity="0.18"/>
+  <circle cx="135" cy="160" r="90" fill="#f0d39f" opacity="0.08"/>
+  <g fill="none" stroke="#f3e0b7" stroke-opacity="0.7" stroke-width="2">
+    <path d="M600 90L600 540M120 314H1080M260 180L940 450M940 180L260 450"/>
+  </g>
+  <text x="600" y="250" text-anchor="middle" fill="#f6f0e3" font-size="40" font-family="Georgia, serif" letter-spacing="12">YOU'RE INVITED</text>
+  <text x="600" y="350" text-anchor="middle" fill="#f7d88f" font-size="82" font-family="Georgia, serif">Aisha &amp; Ahmed</text>
+  <text x="600" y="420" text-anchor="middle" fill="#f6f0e3" font-size="34" font-family="Georgia, serif">14 March 2027 • Hyderabad</text>
+</svg>
