@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
     ArrowRight,
     CalendarClock,
+    ChevronUp,
     Clock3,
     Copy,
     MapPin,
@@ -13,7 +14,7 @@ import {
     VolumeX,
     X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
 import { CrescentDecoration } from './components/decorations/CrescentDecoration'
 import { IslamicPattern } from './components/decorations/IslamicPattern'
@@ -37,9 +38,21 @@ function App() {
   const [wishes, setWishes] = useState(initialWishes)
   const [wishName, setWishName] = useState('')
   const [wishText, setWishText] = useState('')
+  const [showTopButton, setShowTopButton] = useState(false)
 
   const countdown = useCountdown(wedding.date.iso)
   const music = useMusic(wedding.music.src, wedding.music.enabled)
+
+  useEffect(() => {
+    const onScroll = () => setShowTopButton(window.scrollY > 260)
+    onScroll()
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const galleryCards = useMemo(
     () =>
@@ -149,7 +162,7 @@ function App() {
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#dcb974]/10 blur-3xl" />
       </div>
 
-      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-[#d6bb7a]/30 bg-[#102d28]/70 px-3 py-2 backdrop-blur-xl md:max-w-xl md:px-4">
+      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-[#d6bb7a]/30 bg-[#102d28]/80 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-300 md:max-w-xl md:px-4">
         <div className="hidden items-center gap-2 text-[#f1e2bb] md:flex">
           <Sparkles size={16} className="text-[#dcb974]" />
           <span className="text-[10px] uppercase tracking-[0.32em]">Invitation</span>
@@ -164,29 +177,45 @@ function App() {
       </nav>
 
       <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-40">
-        <button type="button" aria-label="Open menu" className="flex h-12 w-12 items-center justify-center rounded-full border border-[#d8b46d]/40 bg-[#102d28]/70 text-[#f7f2e7] shadow-lg backdrop-blur-xl transition hover:scale-105" onClick={() => setMenuOpen((value) => !value)}>
+        <button type="button" aria-label="Open menu" className="flex h-12 w-12 items-center justify-center rounded-full border border-[#d8b46d]/40 bg-[#102d28]/80 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95" onClick={() => setMenuOpen((value) => !value)}>
           <Menu size={18} />
         </button>
       </div>
 
       <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 flex items-center gap-3">
-        <button type="button" aria-label={music.isPlaying ? 'Pause music' : 'Play music'} onClick={music.toggle} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#d8b46d]/40 bg-[#102d28]/70 text-[#f7f2e7] shadow-lg backdrop-blur-xl transition hover:scale-105">
+        <button type="button" aria-label={music.isPlaying ? 'Pause music' : 'Play music'} onClick={music.toggle} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#d8b46d]/40 bg-[#102d28]/80 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95">
           {music.isPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </button>
       </div>
 
       <AnimatePresence>
+        {showTopButton && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 12 }}
+            type="button"
+            aria-label="Scroll to top"
+            onClick={scrollToTop}
+            className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-[#d8b46d]/40 bg-[#102d28]/85 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 md:h-12 md:w-12"
+          >
+            <ChevronUp size={18} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {menuOpen && (
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 24 }} className="fixed inset-x-4 top-20 z-50 rounded-[28px] border border-[#d8b46d]/30 bg-[#102d28]/90 p-4 shadow-2xl backdrop-blur-xl md:hidden">
+          <motion.div initial={{ opacity: 0, y: -16, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -16, scale: 0.96 }} transition={{ duration: 0.22, ease: 'easeOut' }} className="fixed inset-x-4 top-20 z-50 rounded-[28px] border border-[#d8b46d]/40 bg-[#112d2b]/95 p-4 shadow-[0_22px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl md:hidden">
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase tracking-[0.4em] text-[#d8b46d]">Menu</span>
-              <button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="rounded-full border border-[#d8b46d]/30 p-2">
+              <button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="rounded-full border border-[#d8b46d]/30 bg-[#183932]/80 p-2 text-[#f7f2e7]">
                 <X size={14} />
               </button>
             </div>
             <div className="mt-4 flex flex-col gap-3">
               {navItems.map((item) => (
-                <a key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="rounded-full border border-[#d8b46d]/20 px-3 py-2 text-sm text-[#f7f2e7]">
+                <a key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="rounded-full border border-[#d8b46d]/20 bg-[#183932]/60 px-3 py-2 text-sm text-[#f7f2e7] transition hover:bg-[#204a43]">
                   {item.label}
                 </a>
               ))}
@@ -239,7 +268,15 @@ function App() {
                 {wedding.date.gregorian}
               </motion.p>
 
-              <motion.button type="button" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setIsOpened(true)} className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#caa767] bg-[#1d483f] px-6 py-3 text-sm font-medium tracking-[0.2em] text-[#f6f0e3] shadow-lg shadow-[#0e2d29]/20 transition">
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                onClick={() => setIsOpened(true)}
+                className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#caa767] bg-[#1d483f] px-6 py-3 text-sm font-medium tracking-[0.2em] text-[#f6f0e3] shadow-lg shadow-[#0e2d29]/20 transition"
+              >
                 Open Invitation
                 <ArrowRight size={16} />
               </motion.button>
