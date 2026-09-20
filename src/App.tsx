@@ -39,6 +39,7 @@ function App() {
   const [wishName, setWishName] = useState('')
   const [wishText, setWishText] = useState('')
   const [showTopButton, setShowTopButton] = useState(false)
+  const [showWelcomeHint, setShowWelcomeHint] = useState(false)
 
   const countdown = useCountdown(wedding.date.iso)
   const music = useMusic(wedding.music.src, wedding.music.enabled)
@@ -52,6 +53,23 @@ function App() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleOpenInvitation = () => {
+    setIsOpened(true)
+    setShowWelcomeHint(true)
+
+    window.setTimeout(() => {
+      setShowWelcomeHint(false)
+    }, 1800)
+
+    window.setTimeout(() => {
+      const storySection = document.getElementById('story')
+      if (!storySection) return
+
+      const top = storySection.getBoundingClientRect().top + window.scrollY - 90
+      window.scrollTo({ top, behavior: 'smooth' })
+    }, 180)
   }
 
   const galleryCards = useMemo(
@@ -274,12 +292,27 @@ function App() {
                 whileTap={{ scale: 0.98 }}
                 animate={{ y: [0, -5, 0] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                onClick={() => setIsOpened(true)}
+                onClick={handleOpenInvitation}
                 className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#caa767] bg-[#1d483f] px-6 py-3 text-sm font-medium tracking-[0.2em] text-[#f6f0e3] shadow-lg shadow-[#0e2d29]/20 transition"
               >
                 Open Invitation
                 <ArrowRight size={16} />
               </motion.button>
+
+              <AnimatePresence>
+                {showWelcomeHint && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 14, scale: 0.92 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.96 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d7b779]/40 bg-[#fffaf2]/90 px-4 py-2 text-[10px] uppercase tracking-[0.28em] text-[#173d38] shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
+                  >
+                    <span className="text-[#d19f52]">✦</span>
+                    Welcome
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </section>
@@ -287,7 +320,7 @@ function App() {
         <AnimatePresence>
           {isOpened && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-24 pb-20 pt-4 md:space-y-28">
-              <motion.section id="story" initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="relative overflow-hidden rounded-[2rem] border border-[#d8b46d]/30 bg-[#f4f0e7]/90 p-5 text-[#1d3d36] shadow-[0_32px_70px_rgba(0,0,0,0.12)] md:p-10">
+              <motion.section id="story" initial={{ opacity: 0, y: 32, filter: 'blur(10px)', scale: 0.98 }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative overflow-hidden rounded-[2rem] border border-[#d8b46d]/30 bg-[#f4f0e7]/90 p-5 text-[#1d3d36] shadow-[0_32px_70px_rgba(0,0,0,0.12)] md:p-10">
                 <div className="absolute inset-0 opacity-50" aria-hidden="true">
                   <IslamicPattern className="absolute -left-10 top-10 h-48 w-48 text-[#d8b46d]/15" />
                   <IslamicPattern className="absolute -right-10 bottom-5 h-52 w-52 text-[#d8b46d]/12" />
@@ -296,7 +329,7 @@ function App() {
                 <div className="relative grid gap-10 lg:grid-cols-[1fr_1.1fr_1fr] lg:items-center">
                   <BrideGroomIllustration side="left" className="hidden w-full max-w-[220px] justify-self-start lg:block" />
                   <div className="text-center">
-                    <p className="font-[Georgia] text-[11px] uppercase tracking-[0.45em] text-[#20453f]">بِسْمِ ٱللّٰهِ</p>
+                    <p className="font-[Georgia] text-[11px] uppercase tracking-[0.45em] text-[#20453f]">بِسْمِ ٱللّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
                     <div className="mt-7 flex items-center justify-center gap-3 text-[#d6b06a]">
                       <div className="h-px w-12 bg-[#d6b06a]/60" />
                       <Star size={14} fill="currentColor" />
@@ -322,7 +355,7 @@ function App() {
                   <p className="font-[Georgia] text-[11px] uppercase tracking-[0.5em] text-[#d7b779]">Qur’an</p>
                   <h3 className="mt-4 font-[Georgia] text-3xl text-[#f7f0e4] md:text-5xl">Blessing &amp; Guidance</h3>
                 </div>
-                <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#102d28]/60 p-6 text-center shadow-[0_24px_70px_rgba(0,0,0,0.18)] md:p-10">
+                <motion.div initial={{ opacity: 0, y: 28, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#102d28]/60 p-6 text-center shadow-[0_24px_70px_rgba(0,0,0,0.18)] md:p-10">
                   <p className="font-[Georgia] text-lg leading-9 text-[#f6f0e3] md:text-2xl">“{wedding.quranVerse.translation}”</p>
                   <p className="mt-6 font-[Georgia] text-2xl text-[#d7b779]">{wedding.quranVerse.reference}</p>
                   <p className="mt-3 text-sm uppercase tracking-[0.32em] text-[#eae1cf]/80">{wedding.quranVerse.arabic}</p>
@@ -341,7 +374,7 @@ function App() {
                     { label: 'Minutes', value: countdown.minutes },
                     { label: 'Seconds', value: countdown.seconds },
                   ].map((item) => (
-                    <motion.div key={item.label} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="rounded-[1.5rem] border border-[#d7b779]/30 bg-[#f6efe3]/10 p-4 text-center shadow-lg backdrop-blur-sm md:p-6">
+                    <motion.div key={item.label} initial={{ opacity: 0, scale: 0.88, filter: 'blur(8px)' }} whileInView={{ opacity: 1, scale: 1, filter: 'blur(0px)' }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[1.5rem] border border-[#d7b779]/30 bg-[#f6efe3]/10 p-4 text-center shadow-lg backdrop-blur-sm md:p-6">
                       <motion.div key={`${item.label}-${item.value}`} initial={{ scale: 0.8, opacity: 0.7 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }} className="font-[Georgia] text-4xl text-[#f7f2e7] md:text-6xl">
                         {String(item.value).padStart(2, '0')}
                       </motion.div>
@@ -360,7 +393,7 @@ function App() {
                   <div className="absolute bottom-0 left-5 top-0 w-px bg-gradient-to-b from-[#d7b779] via-[#ddc58d] to-transparent md:left-1/2" />
                   <div className="space-y-8">
                     {wedding.events.map((event, index) => (
-                      <motion.div key={event.name} initial={{ opacity: 0, x: index % 2 === 0 ? -24 : 24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} className="relative">
+                      <motion.div key={event.name} initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30, filter: 'blur(12px)', scale: 0.98 }} whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative">
                         <div className="md:flex md:items-center md:justify-center">
                           <div className={`rounded-[1.5rem] border border-[#d7b779]/30 bg-[#f1efe8]/90 p-5 text-[#1d3d36] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:w-[42%] ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'}`}>
                             <div className="flex items-center gap-3">
@@ -387,7 +420,7 @@ function App() {
               </section>
 
               <section id="venue" className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-                <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#f2efe8]/90 p-5 text-[#1d3d36] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-8">
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#f2efe8]/90 p-5 text-[#1d3d36] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-8">
                   <div className="mb-5 flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#173f39] text-[#f5e7c4]">
                       <MapPin size={18} />
@@ -430,7 +463,7 @@ function App() {
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#102d28]/70 p-5 text-[#f7f2e7] shadow-[0_25px_60px_rgba(0,0,0,0.15)] md:p-8">
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#102d28]/70 p-5 text-[#f7f2e7] shadow-[0_25px_60px_rgba(0,0,0,0.15)] md:p-8">
                   <p className="font-[Georgia] text-[11px] uppercase tracking-[0.4em] text-[#d7b779]">Share</p>
                   <h3 className="mt-3 font-[Georgia] text-3xl">Share Invitation</h3>
                   <div className="mt-8 space-y-3">
@@ -466,7 +499,7 @@ function App() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {galleryCards.map((item, index) => (
-                    <motion.div key={item.id} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.08 }} className="group overflow-hidden rounded-[1.75rem] border border-[#d7b779]/25 bg-[#f1efe9]/90 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
+                    <motion.div key={item.id} initial={{ opacity: 0, y: 26, filter: 'blur(10px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.08, duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="group overflow-hidden rounded-[1.75rem] border border-[#d7b779]/25 bg-[#f1efe9]/90 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
                       <div className="relative h-72 overflow-hidden" style={{ background: item.gradient }}>
                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8), transparent 40%)' }} />
                         <div className="absolute inset-x-5 bottom-5 flex items-end justify-between text-[#fffaf4]">
@@ -480,7 +513,7 @@ function App() {
               </section>
 
               <section id="rsvp" className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-                <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#f0eee7]/90 p-5 text-[#1d3d36] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-8">
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#f0eee7]/90 p-5 text-[#1d3d36] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-8">
                   <p className="font-[Georgia] text-[11px] uppercase tracking-[0.4em] text-[#d7b779]">RSVP</p>
                   <h3 className="mt-3 font-[Georgia] text-3xl">Will You Join Us?</h3>
                   <p className="mt-4 text-base leading-7 text-[#325a53]">Your presence would make our celebration even more special. Kindly let us know if you&apos;ll be joining us.</p>
@@ -523,7 +556,7 @@ function App() {
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#102d28]/70 p-5 text-[#f7f2e7] shadow-[0_25px_60px_rgba(0,0,0,0.15)] md:p-8">
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#102d28]/70 p-5 text-[#f7f2e7] shadow-[0_25px_60px_rgba(0,0,0,0.15)] md:p-8">
                   <p className="font-[Georgia] text-[11px] uppercase tracking-[0.4em] text-[#d7b779]">Guest Wishes</p>
                   <h3 className="mt-3 font-[Georgia] text-3xl">A Few Words From You</h3>
                   <div className="mt-6 space-y-3">
@@ -545,7 +578,7 @@ function App() {
                 </motion.div>
               </section>
 
-              <motion.section initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="relative overflow-hidden rounded-[2rem] border border-[#d8b46d]/25 bg-[linear-gradient(135deg,#0d312d,#163f39_45%,#d9b978)] p-8 text-[#f7f2e7] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-12">
+              <motion.section initial={{ opacity: 0, y: 28, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative overflow-hidden rounded-[2rem] border border-[#d8b46d]/25 bg-[linear-gradient(135deg,#0d312d,#163f39_45%,#d9b978)] p-8 text-[#f7f2e7] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-12">
                 <div className="absolute right-8 top-8 opacity-50" aria-hidden="true">
                   <CrescentDecoration className="h-20 w-20 text-[#f4e9d0]" />
                 </div>
@@ -553,7 +586,7 @@ function App() {
                   <p className="font-[Georgia] text-[11px] uppercase tracking-[0.5em] text-[#f2dfb0]">With Love</p>
                   <p className="mt-5 font-[Georgia] text-5xl leading-tight text-[#fffaf4] md:text-7xl">بَارَكَ ٱللّٰهُ لَنَا وَلَكُمْ</p>
                   <p className="mt-6 text-lg text-[#f0e3c7] md:text-2xl">With love and duas,</p>
-                  <p className="mt-3 font-[Georgia] text-3xl text-[#fffaf4] md:text-5xl">{wedding.bride.name} <span className="mx-2 text-[#f0d89e]">&</span> {wedding.groom.name}</p>
+                  <p className="mt-3 font-[Georgia] text-3xl text-[#fffaf4] md:text-5xl">{wedding.groom.name} <span className="mx-2 text-[#f0d89e]">&</span> {wedding.bride.name}</p>
                   <p className="mt-6 text-sm uppercase tracking-[0.45em] text-[#f0e3c7]">{wedding.date.gregorian}</p>
                 </div>
               </motion.section>
