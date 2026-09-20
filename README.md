@@ -1,32 +1,94 @@
-# React + TypeScript + Vite
+# Shahan & Masura Wedding Invitation
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A premium animated Muslim wedding invitation built with React, Vite, TypeScript, Tailwind CSS, and Framer Motion.
 
-Currently, two official plugins are available:
+This project is designed as a beautiful digital invitation for sharing with family and friends, featuring:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- premium luxury emerald and gold theme
+- animated opening and story sections
+- countdown to the event
+- venue and directions section
+- RSVP section
+- guest wishes section
+- calendar and share actions
+- mobile-responsive layout for iPhone, Android, and desktop browsers
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + TypeScript
+- Vite 8
+- Tailwind CSS
+- Framer Motion animations
+- Local RSVP mock flow for UI demonstration
+- WhatsApp / copy link / native share support
+- Google Calendar integration
+- ICS download support
+- GitHub Pages deployment workflow
 
-## Expanding the Oxlint configuration
+## Local Development
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+Requirements:
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+- Node 20+
+
+Install dependencies:
+
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Run the app locally:
+
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Preview production build:
+
+```bash
+npm run preview -- --host 0.0.0.0
+```
+
+## Deployment
+
+This repo includes a GitHub Actions workflow for GitHub Pages deployment:
+
+- .github/workflows/deploy.yml
+
+For GitHub Pages:
+
+1. Create a GitHub repository
+2. Push the code
+3. Go to repository Settings > Pages
+4. Set source to GitHub Actions
+
+## Notes
+
+The RSVP and guest wishes currently work as a frontend mock for demonstration. For real production data capture, it is recommended to connect them to:
+
+- Google Forms
+- Formspree
+- Supabase
+- Firebase
+- a custom backend
+
+## Project Structure
+
+```bash
+src/
+  App.tsx
+  data/wedding.ts
+  hooks/
+  services/
+  utils/
+```
+
+## License
+
+This project is intended for personal wedding invitation use.
