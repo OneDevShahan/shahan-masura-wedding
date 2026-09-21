@@ -287,14 +287,14 @@ function App() {
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[var(--brand-secondary)]/10 blur-3xl" />
       </div>
 
-      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-14 max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-white/10 bg-[var(--brand-primary-deep)]/90 px-4 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 md:h-16 md:max-w-2xl md:px-5">
+      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-14 max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-white/10 bg-[var(--brand-primary-deep)]/90 px-3 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 md:h-16 md:max-w-2xl md:px-5">
         <a href="#home" className="hidden items-center gap-3 md:flex">
           <Sparkles size={22} className="text-[var(--brand-secondary)]" />
           <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[var(--brand-secondary)] transition-transform duration-300 ease-out hover:translate-x-1 hover:scale-[1.2] md:text-[11px]">Invitation</span>
         </a>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
           {navItems.map((item) => (
-            <a key={item.label} href={item.href} className="text-[9px] font-semibold tracking-[0.18em] text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-[1.25] hover:text-[var(--brand-secondary)] sm:text-[10px] md:text-[11px]">
+            <a key={item.label} href={item.href} className="text-[8px] font-semibold tracking-[0.14em] text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-[1.25] hover:text-[var(--brand-secondary)] sm:text-[9px] md:text-[11px]">
               {item.label}
             </a>
           ))}
@@ -380,13 +380,13 @@ function App() {
         )}
       </AnimatePresence>
 
-      <main id="home" className="relative mx-auto max-w-6xl px-3 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-[calc(5.5rem+env(safe-area-inset-top))] md:px-6 md:pb-20 md:pt-20">
+      <main id="home" className="relative mx-auto max-w-6xl overflow-x-hidden px-3 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-[calc(5.5rem+env(safe-area-inset-top))] md:px-6 md:pb-20 md:pt-20">
         <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-8">
-          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, ease: 'easeOut' }} className="relative w-full max-w-xl rounded-[2rem] border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary-deep)]/95 p-5 text-[var(--brand-neutral)] shadow-[0_35px_90px_rgba(0,0,0,0.2)] md:p-8">
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, ease: 'easeOut' }} className="relative w-full max-w-xl rounded-[2rem] border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary-deep)]/95 p-4 text-[var(--brand-neutral)] shadow-[0_35px_90px_rgba(0,0,0,0.2)] sm:p-5 md:p-8">
             <div className="absolute inset-x-8 bottom-4 h-px bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
 
             <div className="relative text-center">
-              <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7 }} className="font-[Georgia] font-bold text-[19px] tracking-[0.42em] text-[var(--brand-secondary)] sm:text-[20px] md:text-[25px]">
+              <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7 }} className="font-[Georgia] font-bold text-[16px] tracking-[0.18em] text-[var(--brand-secondary)] sm:text-[20px] sm:tracking-[0.42em] md:text-[25px]">
                 بِسْمِ ٱللّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
               </motion.p>
 
@@ -394,25 +394,25 @@ function App() {
                 <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
               </motion.div>
 
-              <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }} className="mt-6 font-[Georgia] text-[2.3rem] leading-none tracking-[0.12em] text-[var(--brand-secondary)] md:text-[4rem]">
+              <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }} className="mt-6 font-[Georgia] text-[1.8rem] leading-none tracking-[0.08em] text-[var(--brand-secondary)] sm:text-[2.3rem] sm:tracking-[0.12em] md:text-[4rem]">
                 YOU&apos;RE INVITED
               </motion.h1>
 
-              <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65, duration: 0.8 }} className="mt-5 font-[Georgia] text-base tracking-[0.28em] text-[var(--brand-neutral)]/80 md:text-xl">
+              <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65, duration: 0.8 }} className="mt-4 font-[Georgia] text-base tracking-[0.28em] text-[var(--brand-neutral)]/80 md:mt-5 md:text-xl">
                 to the
               </motion.p>
 
-              <motion.p initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.8 }} className="mt-5 font-[Georgia] text-3xl tracking-[0.08em] text-[var(--brand-neutral)] md:text-6xl">
+              <motion.p initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.8 }} className="mt-4 font-[Georgia] text-3xl tracking-[0.08em] text-[var(--brand-neutral)] md:mt-5 md:text-6xl">
                 Nikah
               </motion.p>
 
-              <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95, duration: 0.8 }} className="mt-6 space-y-1 text-[var(--brand-neutral)]">
-                <div className="font-[Georgia] text-[2.1rem] tracking-[0.08em] text-[var(--brand-secondary)] md:text-[4rem]">{wedding.groom.name}</div>
+              <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95, duration: 0.8 }} className="mt-5 space-y-1 text-[var(--brand-neutral)] sm:mt-6">
+                <div className="font-[Georgia] text-[1.7rem] tracking-[0.06em] text-[var(--brand-secondary)] sm:text-[2.1rem] md:text-[4rem]">{wedding.groom.name}</div>
                 <div className="text-xl text-[var(--brand-neutral)] md:text-3xl">&</div>
-                <div className="font-[Georgia] text-[2.1rem] tracking-[0.08em] text-[var(--brand-secondary)] md:text-[4rem]">{wedding.bride.name}</div>
+                <div className="font-[Georgia] text-[1.7rem] tracking-[0.06em] text-[var(--brand-secondary)] sm:text-[2.1rem] md:text-[4rem]">{wedding.bride.name}</div>
               </motion.div>
 
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.7 }} className="mt-8 text-xs uppercase tracking-[0.38em] font-bold text-white md:text-sm">
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.7 }} className="mt-6 text-[10px] uppercase tracking-[0.32em] font-bold text-white sm:text-xs md:mt-8 md:text-sm md:tracking-[0.38em]">
                 {wedding.date.gregorian}
               </motion.p>
 
@@ -423,7 +423,7 @@ function App() {
                 animate={{ y: [0, -5, 0] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
                 onClick={handleOpenInvitation}
-                className="mt-8 inline-flex items-center gap-3 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-6 py-3 text-sm font-medium tracking-[0.2em] text-[#f6f0e3] shadow-lg shadow-black/20 transition"
+                className="mt-7 inline-flex items-center gap-3 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-3 text-xs font-medium tracking-[0.18em] text-[#f6f0e3] shadow-lg shadow-black/20 transition sm:px-6 sm:text-sm sm:tracking-[0.2em] md:mt-8"
               >
                 {invitationState === 'welcome' ? 'Welcome' : 'Open Invitation'}
                 <ArrowRight size={16} />
@@ -454,7 +454,7 @@ function App() {
                 <div className="relative grid gap-10 lg:grid-cols-[1fr_1.1fr_1fr] lg:items-center">
                   <BrideGroomIllustration side="left" className="hidden w-full max-w-[220px] justify-self-start lg:block" />
                   <div className="text-center">
-                    <p className="font-[Georgia] font-bold text-[19px] uppercase tracking-[0.45em] text-[var(--brand-secondary)] sm:text-[20px] md:text-[25px]">بِسْمِ ٱللّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+                    <p className="font-[Georgia] font-bold text-[16px] uppercase tracking-[0.18em] text-[var(--brand-secondary)] sm:text-[20px] sm:tracking-[0.45em] md:text-[25px]">بِسْمِ ٱللّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
                     <div className="mt-7 flex items-center justify-center">
                       <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
                     </div>
@@ -510,10 +510,10 @@ function App() {
                   <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)] md:text-5xl">Events</h3>
                 </div>
                 <div className="relative mx-auto max-w-3xl">
-                  <div className="absolute bottom-0 left-[18px] top-0 w-px bg-gradient-to-b from-[var(--brand-secondary)] via-[var(--brand-secondary)]/70 to-transparent md:left-1/2" />
+                  <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-gradient-to-b from-[var(--brand-secondary)] via-[var(--brand-secondary)]/70 to-transparent md:block" />
                   <div className="space-y-8">
                     {wedding.events.map((event, index) => (
-                      <motion.div key={event.name} initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30, filter: 'blur(12px)', scale: 0.98 }} whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative pl-8 md:pl-0">
+                      <motion.div key={event.name} initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30, filter: 'blur(12px)', scale: 0.98 }} whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative pl-0 md:pl-0">
                         <div className="md:flex md:items-center md:justify-center">
                           <div className={`rounded-[1.5rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-primary-deep)]/90 p-5 text-[var(--brand-neutral)] shadow-[0_20px_50px_rgba(0,0,0,0.08)] md:w-[42%] ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'}`}>
                             <div className="flex items-center gap-3">
@@ -532,7 +532,7 @@ function App() {
                             </a>
                           </div>
                         </div>
-                        <div className="absolute left-0 top-8 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--brand-secondary)] bg-[var(--brand-primary)] md:left-1/2 md:-translate-x-1/2" />
+                        <div className="absolute left-0 top-8 hidden h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--brand-secondary)] bg-[var(--brand-primary)] md:left-1/2 md:flex md:-translate-x-1/2" />
                       </motion.div>
                     ))}
                   </div>
@@ -686,6 +686,9 @@ function App() {
                   <p className="mt-6 text-lg text-[var(--brand-neutral)] md:text-2xl">With love and duas,</p>
                   <p className="mt-3 font-[Georgia] text-3xl text-[var(--brand-secondary)] md:text-5xl">{wedding.groom.name} <span className="mx-2 text-[var(--brand-neutral)]">&</span> {wedding.bride.name}</p>
                   <p className="mt-6 text-sm uppercase tracking-[0.45em] font-bold text-white">{wedding.date.gregorian}</p>
+                </div>
+                <div className="mt-10 flex items-center justify-center">
+                  <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
                 </div>
               </motion.section>
             </motion.div>
