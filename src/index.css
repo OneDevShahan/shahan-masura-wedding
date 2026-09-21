@@ -12,8 +12,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --brand-gold: #d7b779;
-  --brand-gold-soft: #f0dfb4;
+  --brand-gold: #d7b06c;
+  --brand-gold-soft: #f2e2b2;
   --brand-green-900: #071711;
   --brand-green-800: #0f2d28;
   --brand-green-700: #163f39;
@@ -58,36 +58,6 @@ textarea {
 
 button {
   cursor: pointer;
-}
-
-.flower-petal {
-  position: absolute;
-  top: -18px;
-  width: 8px;
-  height: 18px;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, rgba(246, 221, 164, 0.96), rgba(184, 139, 71, 0.72));
-  box-shadow: 0 0 10px rgba(215, 183, 121, 0.4);
-  animation: petal-fall 6s ease-in infinite;
-  opacity: 0.8;
-}
-
-.flower-petal:nth-child(odd) {
-  background: linear-gradient(180deg, rgba(248, 234, 206, 0.95), rgba(214, 177, 103, 0.7));
-}
-
-@keyframes petal-fall {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate3d(12px, 120px, 0) rotate(24deg);
-    opacity: 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
