@@ -19,7 +19,6 @@ export type WishMessage = {
 
 export const navItems = [
   { label: 'Home', href: '#home' },
-  { label: 'Our Story', href: '#story' },
   { label: 'Events', href: '#events' },
   { label: 'Venue', href: '#venue' },
   { label: 'RSVP', href: '#rsvp' },

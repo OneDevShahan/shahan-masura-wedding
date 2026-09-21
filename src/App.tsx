@@ -14,7 +14,7 @@ import {
     VolumeX,
     X,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
 import { CrescentDecoration } from './components/decorations/CrescentDecoration'
 import { IslamicPattern } from './components/decorations/IslamicPattern'
@@ -40,6 +40,7 @@ function App() {
   const [wishText, setWishText] = useState('')
   const [showTopButton, setShowTopButton] = useState(false)
   const [showWelcomeHint, setShowWelcomeHint] = useState(false)
+  const [invitationState, setInvitationState] = useState<'idle' | 'welcome'>('idle')
 
   const countdown = useCountdown(wedding.date.iso)
   const music = useMusic(wedding.music.src, wedding.music.enabled)
@@ -57,7 +58,12 @@ function App() {
 
   const handleOpenInvitation = () => {
     setIsOpened(true)
+    setInvitationState('welcome')
     setShowWelcomeHint(true)
+
+    if (!music.isPlaying) {
+      void music.toggle()
+    }
 
     window.setTimeout(() => {
       setShowWelcomeHint(false)
@@ -71,15 +77,6 @@ function App() {
       window.scrollTo({ top, behavior: 'smooth' })
     }, 180)
   }
-
-  const galleryCards = useMemo(
-    () =>
-      wedding.gallery.map((item, index) => ({
-        ...item,
-        id: `${item.title}-${index}`,
-      })),
-    [],
-  )
 
   const handleSubmitRSVP = async () => {
     const trimmedName = guestName.trim()
@@ -180,14 +177,14 @@ function App() {
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#dcb974]/10 blur-3xl" />
       </div>
 
-      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-[#d6bb7a]/30 bg-[#102d28]/80 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-300 md:max-w-xl md:px-4">
+      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-16 max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-[#d6bb7a]/30 bg-[#102d28]/90 px-4 shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-300 md:h-20 md:max-w-xl md:px-5">
         <div className="hidden items-center gap-2 text-[#f1e2bb] md:flex">
-          <Sparkles size={16} className="text-[#dcb974]" />
-          <span className="text-[10px] uppercase tracking-[0.32em]">Invitation</span>
+          <Sparkles size={18} className="text-[#dcb974]" />
+          <span className="text-[10px] uppercase tracking-[0.32em] md:text-[11px]">Invitation</span>
         </div>
         <div className="flex items-center gap-2 md:gap-4">
           {navItems.map((item) => (
-            <a key={item.label} href={item.href} className="text-[10px] tracking-[0.18em] text-[#f7f2e7]/70 transition hover:text-[#f7f2e7] md:text-[11px]">
+            <a key={item.label} href={item.href} className="text-[9px] tracking-[0.18em] text-[#f7f2e7]/80 transition hover:text-[#f7f2e7] sm:text-[10px] md:text-[11px]">
               {item.label}
             </a>
           ))}
@@ -253,7 +250,13 @@ function App() {
             <div className="absolute inset-x-6 top-4 h-px bg-gradient-to-r from-transparent via-[#caa767] to-transparent" />
             <div className="absolute inset-x-8 bottom-4 h-px bg-gradient-to-r from-transparent via-[#caa767] to-transparent" />
 
-            <div className="text-center">
+            <div className="relative text-center">
+              <div className="pointer-events-none absolute inset-x-0 -top-6 flex items-center justify-center gap-3 opacity-80">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <span key={index} className="flower-petal" style={{ left: `${10 + index * 10}px`, animationDelay: `${index * 0.45}s` }} />
+                ))}
+              </div>
+
               <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7 }} className="font-[Georgia] text-[10px] tracking-[0.42em] text-[#21463f] md:text-[11px]">
                 بِسْمِ ٱللّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
               </motion.p>
@@ -295,7 +298,7 @@ function App() {
                 onClick={handleOpenInvitation}
                 className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#caa767] bg-[#1d483f] px-6 py-3 text-sm font-medium tracking-[0.2em] text-[#f6f0e3] shadow-lg shadow-[#0e2d29]/20 transition"
               >
-                Open Invitation
+                {invitationState === 'welcome' ? 'Welcome' : 'Open Invitation'}
                 <ArrowRight size={16} />
               </motion.button>
 
@@ -309,7 +312,7 @@ function App() {
                     className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d7b779]/40 bg-[#fffaf2]/90 px-4 py-2 text-[10px] uppercase tracking-[0.28em] text-[#173d38] shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
                   >
                     <span className="text-[#d19f52]">✦</span>
-                    Welcome
+                    Thank you — please scroll down
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -329,6 +332,11 @@ function App() {
                 <div className="relative grid gap-10 lg:grid-cols-[1fr_1.1fr_1fr] lg:items-center">
                   <BrideGroomIllustration side="left" className="hidden w-full max-w-[220px] justify-self-start lg:block" />
                   <div className="text-center">
+                    <div className="pointer-events-none absolute inset-x-0 -top-8 flex items-center justify-center opacity-80">
+                      {Array.from({ length: 10 }).map((_, index) => (
+                        <span key={index} className="flower-petal" style={{ left: `${10 + index * 12}px`, animationDelay: `${index * 0.35}s` }} />
+                      ))}
+                    </div>
                     <p className="font-[Georgia] text-[11px] uppercase tracking-[0.45em] text-[#20453f]">بِسْمِ ٱللّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
                     <div className="mt-7 flex items-center justify-center gap-3 text-[#d6b06a]">
                       <div className="h-px w-12 bg-[#d6b06a]/60" />
@@ -390,10 +398,10 @@ function App() {
                   <h3 className="mt-4 font-[Georgia] text-3xl text-[#f7f0e4] md:text-5xl">Our Celebration</h3>
                 </div>
                 <div className="relative mx-auto max-w-3xl">
-                  <div className="absolute bottom-0 left-5 top-0 w-px bg-gradient-to-b from-[#d7b779] via-[#ddc58d] to-transparent md:left-1/2" />
+                  <div className="absolute bottom-0 left-[18px] top-0 w-px bg-gradient-to-b from-[#d7b779] via-[#ddc58d] to-transparent md:left-1/2" />
                   <div className="space-y-8">
                     {wedding.events.map((event, index) => (
-                      <motion.div key={event.name} initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30, filter: 'blur(12px)', scale: 0.98 }} whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative">
+                      <motion.div key={event.name} initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30, filter: 'blur(12px)', scale: 0.98 }} whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative pl-8 md:pl-0">
                         <div className="md:flex md:items-center md:justify-center">
                           <div className={`rounded-[1.5rem] border border-[#d7b779]/30 bg-[#f1efe8]/90 p-5 text-[#1d3d36] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:w-[42%] ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'}`}>
                             <div className="flex items-center gap-3">
@@ -412,7 +420,7 @@ function App() {
                             </a>
                           </div>
                         </div>
-                        <div className="absolute left-2.5 top-8 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#d7b779] bg-[#163f39] md:left-1/2 md:-translate-x-1/2" />
+                        <div className="absolute left-0 top-8 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#d7b779] bg-[#163f39] md:left-1/2 md:-translate-x-1/2" />
                       </motion.div>
                     ))}
                   </div>
@@ -492,26 +500,6 @@ function App() {
                 </motion.div>
               </section>
 
-              <section className="relative">
-                <div className="mb-8 text-center">
-                  <p className="font-[Georgia] text-[11px] uppercase tracking-[0.5em] text-[#d7b779]">Story</p>
-                  <h3 className="mt-4 font-[Georgia] text-3xl text-[#f7f0e4] md:text-5xl">Our Story</h3>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {galleryCards.map((item, index) => (
-                    <motion.div key={item.id} initial={{ opacity: 0, y: 26, filter: 'blur(10px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.08, duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="group overflow-hidden rounded-[1.75rem] border border-[#d7b779]/25 bg-[#f1efe9]/90 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
-                      <div className="relative h-72 overflow-hidden" style={{ background: item.gradient }}>
-                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8), transparent 40%)' }} />
-                        <div className="absolute inset-x-5 bottom-5 flex items-end justify-between text-[#fffaf4]">
-                          <span className="font-[Georgia] text-2xl">{item.title}</span>
-                          <span className="rounded-full border border-white/40 px-2 py-1 text-[10px] uppercase tracking-[0.2em]">Moments</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </section>
-
               <section id="rsvp" className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
                 <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[#d8b46d]/25 bg-[#f0eee7]/90 p-5 text-[#1d3d36] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-8">
                   <p className="font-[Georgia] text-[11px] uppercase tracking-[0.4em] text-[#d7b779]">RSVP</p>
@@ -536,14 +524,16 @@ function App() {
                       </div>
                     </div>
 
-                    <div>
-                      <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[#1d3d36]">Number of Guests</p>
-                      <div className="flex w-fit items-center rounded-full border border-[#d7b779]/35 bg-[#edf2ee]/70 p-2">
-                        <button type="button" aria-label="Decrease guests" onClick={() => setGuests((value) => Math.max(1, value - 1))} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173f39] text-[#f8f2e6]">-</button>
-                        <span className="w-12 text-center text-lg font-medium text-[#1d3d36]">{guests}</span>
-                        <button type="button" aria-label="Increase guests" onClick={() => setGuests((value) => value + 1)} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173f39] text-[#f8f2e6]">+</button>
+                    {attending === 'yes' && (
+                      <div>
+                        <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[#1d3d36]">Number of Guests</p>
+                        <div className="flex w-fit items-center rounded-full border border-[#d7b779]/35 bg-[#edf2ee]/70 p-2">
+                          <button type="button" aria-label="Decrease guests" onClick={() => setGuests((value) => Math.max(1, value - 1))} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173f39] text-[#f8f2e6]">-</button>
+                          <span className="w-12 text-center text-lg font-medium text-[#1d3d36]">{guests}</span>
+                          <button type="button" aria-label="Increase guests" onClick={() => setGuests((value) => value + 1)} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173f39] text-[#f8f2e6]">+</button>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div>
                       <label htmlFor="message" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[#1d3d36]">Leave a message for the couple</label>

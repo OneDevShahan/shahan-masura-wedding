@@ -24,10 +24,7 @@ export function useMusic(src: string, enabled: boolean) {
 
     const storedPreference = window.sessionStorage.getItem('wedding-music')
     if (storedPreference === 'on') {
-      audio
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false))
+      setIsPlaying(true)
     }
 
     return () => {
@@ -56,6 +53,7 @@ export function useMusic(src: string, enabled: boolean) {
       window.sessionStorage.setItem('wedding-music', 'on')
     } catch {
       setIsPlaying(false)
+      window.sessionStorage.setItem('wedding-music', 'off')
     }
   }
 
