@@ -287,12 +287,12 @@ function App() {
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[var(--brand-secondary)]/10 blur-3xl" />
       </div>
 
-      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-14 max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-white/10 bg-[var(--brand-primary-deep)]/90 px-3 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 md:h-16 md:max-w-2xl md:px-5">
+      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-[4.5rem] max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-white/10 bg-[var(--brand-primary-deep)]/90 px-4 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 sm:h-16 md:h-16 md:max-w-2xl md:px-5">
         <a href="#home" className="hidden items-center gap-3 md:flex">
           <Sparkles size={22} className="text-[var(--brand-secondary)]" />
           <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[var(--brand-secondary)] transition-transform duration-300 ease-out hover:translate-x-1 hover:scale-[1.2] md:text-[11px]">Invitation</span>
         </a>
-        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-2 md:gap-4">
           {navItems.map((item) => (
             <a key={item.label} href={item.href} className="text-[8px] font-semibold tracking-[0.14em] text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-[1.25] hover:text-[var(--brand-secondary)] sm:text-[9px] md:text-[11px]">
               {item.label}
