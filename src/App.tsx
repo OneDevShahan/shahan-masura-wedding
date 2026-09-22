@@ -559,11 +559,6 @@ function App() {
                     <p className="mt-5 font-[Georgia] text-4xl tracking-[0.08em] text-[var(--brand-secondary)] md:text-6xl">{wedding.groom.name} <span className="mx-2 text-[var(--brand-neutral)]">&</span> {wedding.bride.name}</p>
                     <div className="mt-7 flex justify-center"><Ornament className="h-10 w-52 text-[var(--brand-secondary)]" /></div>
                     <p className="mt-7 text-lg tracking-[0.3em] font-bold text-white md:text-xl">{wedding.date.gregorian}</p>
-                    <p className="mt-3 text-base text-[var(--brand-neutral)] md:text-lg">
-                      {wedding.venue.name}
-                      <span className="mx-2 text-[#d7b779]">•</span>
-                      {wedding.venue.city}
-                    </p>
                   </div>
                   <BrideGroomIllustration side="right" className="hidden w-full max-w-[220px] justify-self-end lg:block" />
                 </div>

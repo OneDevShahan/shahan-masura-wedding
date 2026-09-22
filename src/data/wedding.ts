@@ -85,7 +85,7 @@ export const wedding = {
   },
   music: {
     enabled: true,
-    src: '/src/assets/ashaduallaha.mp3',
+    src: '/ashaduallaha.mp3',
   },
   share: {
     message:
