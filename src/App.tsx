@@ -282,6 +282,12 @@ function App() {
     '--text-light': activePalette.colors.neutral,
   } as CSSProperties
 
+  const paletteFieldStyle = {
+    backgroundColor: activePalette.colors.primary,
+    borderColor: activePalette.colors.secondary,
+    color: activePalette.colors.neutral,
+  } as CSSProperties
+
   return (
     <div style={themeStyle} className="min-h-screen bg-[radial-gradient(circle_at_top,var(--brand-primary-soft)_0%,var(--brand-primary)_35%,var(--brand-primary-deep)_100%)] text-[#f7f2e7] antialiased selection:bg-[var(--brand-secondary)]/30">
       <div className="fixed inset-0 opacity-60" aria-hidden="true">
@@ -313,7 +319,11 @@ function App() {
             <button
               type="button"
               aria-label="Palette options"
-              className="flex items-center gap-2 rounded-full bg-[var(--brand-primary)]/60 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-secondary)] transition hover:bg-[var(--brand-primary-soft)]"
+              className="flex items-center gap-2 rounded-full px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.22em] transition hover:opacity-90"
+              style={{
+                background: `linear-gradient(135deg, ${activePalette.colors.primary} 0%, ${activePalette.colors.primarySoft} 100%)`,
+                color: activePalette.colors.secondary,
+              }}
             >
               <span>Palette</span>
               <ChevronDown size={12} />
@@ -326,7 +336,12 @@ function App() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.96 }}
                   transition={{ duration: 0.18, ease: 'easeOut' }}
-                  className="absolute right-0 top-[calc(100%+0.75rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary-deep)]/90 p-2 shadow-[0_14px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl"
+                  onMouseEnter={() => setPaletteMenuOpen(true)}
+                  onMouseLeave={() => setPaletteMenuOpen(false)}
+                  className="absolute right-0 top-[calc(100%+0.75rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 p-2 shadow-[0_14px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${activePalette.colors.primaryDeep} 0%, ${activePalette.colors.primary} 100%)`,
+                  }}
                 >
                   {paletteOptions.map((option) => (
                     <button
@@ -339,7 +354,10 @@ function App() {
                       }}
                       title={option.name}
                       className="h-5 w-5 rounded-full border border-white/50 transition hover:scale-110"
-                      style={{ background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)` }}
+                      style={{
+                        background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)`,
+                        boxShadow: activePalette.id === option.id ? `0 0 0 2px ${option.colors.secondarySoft}` : 'none',
+                      }}
                     />
                   ))}
                 </motion.div>
@@ -359,7 +377,11 @@ function App() {
             <button
               type="button"
               aria-label="Palette options"
-              className="flex items-center gap-1 rounded-full bg-[var(--brand-primary)]/60 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.2em] text-[var(--brand-secondary)]"
+              className="flex items-center gap-1 rounded-full px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.2em] transition hover:opacity-90"
+              style={{
+                background: `linear-gradient(135deg, ${activePalette.colors.primary} 0%, ${activePalette.colors.primarySoft} 100%)`,
+                color: activePalette.colors.secondary,
+              }}
             >
               <span>Palette</span>
               <ChevronDown size={12} />
@@ -372,7 +394,12 @@ function App() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.96 }}
                   transition={{ duration: 0.18, ease: 'easeOut' }}
-                  className="absolute right-0 top-[calc(100%+0.5rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary-deep)]/90 p-2 shadow-[0_12px_24px_rgba(0,0,0,0.15)] backdrop-blur-xl"
+                  onMouseEnter={() => setPaletteMenuOpen(true)}
+                  onMouseLeave={() => setPaletteMenuOpen(false)}
+                  className="absolute right-0 top-[calc(100%+0.5rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 p-2 shadow-[0_12px_24px_rgba(0,0,0,0.15)] backdrop-blur-xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${activePalette.colors.primaryDeep} 0%, ${activePalette.colors.primary} 100%)`,
+                  }}
                 >
                   {paletteOptions.map((option) => (
                     <button
@@ -385,7 +412,10 @@ function App() {
                       }}
                       title={option.name}
                       className="h-4 w-4 rounded-full border border-white/50 transition hover:scale-110"
-                      style={{ background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)` }}
+                      style={{
+                        background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)`,
+                        boxShadow: activePalette.id === option.id ? `0 0 0 2px ${option.colors.secondarySoft}` : 'none',
+                      }}
                     />
                   ))}
                 </motion.div>
@@ -712,16 +742,16 @@ function App() {
                   <div className="mt-6 space-y-5">
                     <div>
                       <label htmlFor="guestName" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Your Name</label>
-                      <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border border-[var(--brand-secondary)]/35 bg-[var(--brand-neutral-soft)] px-4 py-3 text-base text-[var(--brand-primary-deep)] outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" />
+                      <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
                     </div>
 
                     <div>
                       <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Will you be attending?</p>
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <button type="button" onClick={() => setAttending('yes')} className={`rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025] ${attending === 'yes' ? 'border-[var(--brand-secondary)] bg-[var(--brand-primary)] text-[var(--brand-neutral)]' : 'border-[var(--brand-secondary)] bg-[var(--brand-neutral-soft)] text-[var(--brand-primary-deep)]'}`}>
+                        <button type="button" onClick={() => setAttending('yes')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'yes' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
                           ✓ Yes, I&apos;ll be there
                         </button>
-                        <button type="button" onClick={() => setAttending('no')} className={`rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025] ${attending === 'no' ? 'border-[var(--brand-secondary)] bg-[var(--brand-primary)] text-[var(--brand-neutral)]' : 'border-[var(--brand-secondary)] bg-[var(--brand-neutral-soft)] text-[var(--brand-primary-deep)]'}`}>
+                        <button type="button" onClick={() => setAttending('no')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'no' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
                           ✕ Sorry, I can&apos;t make it
                         </button>
                       </div>
@@ -730,17 +760,17 @@ function App() {
                     {attending === 'yes' && (
                       <div>
                         <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Number of Guests</p>
-                        <div className="flex w-fit items-center rounded-full border border-[var(--brand-secondary)]/35 bg-[var(--brand-neutral-soft)] p-2">
-                          <button type="button" aria-label="Decrease guests" onClick={() => setGuests((value) => Math.max(1, value - 1))} className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] text-[var(--brand-neutral)]">-</button>
-                          <span className="w-12 text-center text-lg font-medium text-[var(--brand-primary-deep)]">{guests}</span>
-                          <button type="button" aria-label="Increase guests" onClick={() => setGuests((value) => value + 1)} className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] text-[var(--brand-neutral)]">+</button>
+                        <div className="flex w-fit items-center rounded-full border p-2" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>
+                          <button type="button" aria-label="Decrease guests" onClick={() => setGuests((value) => Math.max(1, value - 1))} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>-</button>
+                          <span className="w-12 text-center text-lg font-medium" style={{ color: activePalette.colors.neutral }}>{guests}</span>
+                          <button type="button" aria-label="Increase guests" onClick={() => setGuests((value) => value + 1)} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>+</button>
                         </div>
                       </div>
                     )}
 
                     <div>
                       <label htmlFor="message" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Leave a message for the couple</label>
-                      <textarea id="message" value={message} onChange={(event) => setMessage(event.target.value)} rows={4} placeholder="Your message..." className="w-full rounded-2xl border border-[var(--brand-secondary)]/35 bg-[var(--brand-neutral-soft)] px-4 py-3 text-base text-[var(--brand-primary-deep)] outline-none placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" />
+                      <textarea id="message" value={message} onChange={(event) => setMessage(event.target.value)} rows={4} placeholder="Your message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
                     </div>
 
                     <button type="button" onClick={handleSubmitRSVP} className="inline-flex w-full items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-4 text-sm uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-lg shadow-black/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)]">
@@ -761,8 +791,8 @@ function App() {
                   </div>
 
                   <div className="mt-8 space-y-3">
-                    <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Your name" className="w-full rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-base text-[var(--brand-neutral)] placeholder:text-[var(--brand-neutral)]/60" />
-                    <textarea value={wishText} onChange={(event) => setWishText(event.target.value)} rows={3} placeholder="Leave a dua or message..." className="w-full rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-base text-[var(--brand-neutral)] placeholder:text-[var(--brand-neutral)]/60" />
+                    <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
+                    <textarea value={wishText} onChange={(event) => setWishText(event.target.value)} rows={3} placeholder="Leave a dua or message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
                     <button type="button" onClick={addWish} className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/10 px-4 py-3 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)] transition-all duration-300 ease-out hover:scale-[1.025] hover:border-[var(--brand-secondary)]">
                       Add Wish
                     </button>
