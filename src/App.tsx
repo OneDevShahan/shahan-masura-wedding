@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
     ArrowRight,
     CalendarClock,
+    ChevronDown,
     ChevronUp,
     Clock3,
     Copy,
@@ -134,6 +135,7 @@ function App() {
   const [showWelcomeHint, setShowWelcomeHint] = useState(false)
   const [invitationState, setInvitationState] = useState<'idle' | 'welcome'>('idle')
   const [activePalette, setActivePalette] = useState<PaletteOption>(paletteOptions[0])
+  const [paletteMenuOpen, setPaletteMenuOpen] = useState(false)
 
   const countdown = useCountdown(wedding.date.iso)
   const music = useMusic(wedding.music.src, wedding.music.enabled)
@@ -287,44 +289,120 @@ function App() {
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[var(--brand-secondary)]/10 blur-3xl" />
       </div>
 
-      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-[4.5rem] max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-white/10 bg-[var(--brand-primary-deep)]/90 px-4 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 sm:h-16 md:h-16 md:max-w-2xl md:px-5">
-        <a href="#home" className="hidden items-center gap-3 md:flex">
-          <Sparkles size={22} className="text-[var(--brand-secondary)]" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[var(--brand-secondary)] transition-transform duration-300 ease-out hover:translate-x-1 hover:scale-[1.2] md:text-[11px]">Invitation</span>
+      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-[5rem] max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-white/10 bg-[var(--brand-primary-deep)]/90 px-3 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 sm:h-16 md:h-16 md:max-w-2xl md:px-5">
+        <a href="#home" className="flex items-center gap-2 min-w-0 flex-shrink-0 sm:gap-3 md:flex">
+          <Sparkles size={20} className="text-[var(--brand-secondary)] sm:text-[22px]" />
+          <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-secondary)] transition-transform duration-300 ease-out hover:translate-x-1 hover:scale-[1.1] sm:text-[10px] md:text-[11px]">Invitation</span>
         </a>
-        <div className="flex items-center gap-2 sm:gap-2 md:gap-4">
+        <div className="flex flex-1 items-center justify-evenly gap-1 sm:gap-2 md:gap-4">
           {navItems.map((item) => (
-            <a key={item.label} href={item.href} className="text-[8px] font-semibold tracking-[0.14em] text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-[1.25] hover:text-[var(--brand-secondary)] sm:text-[9px] md:text-[11px]">
+            <a key={item.label} href={item.href} className="text-[8px] font-semibold tracking-[0.15em] text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-[1.1] hover:text-[var(--brand-secondary)] sm:text-[9px] md:text-[11px]">
               {item.label}
             </a>
           ))}
         </div>
-        <div className="hidden items-center gap-2 md:flex">
-          {paletteOptions.map((option) => (
+
+        <div className="relative hidden items-center md:flex">
+          <div
+            onMouseEnter={() => setPaletteMenuOpen(true)}
+            onMouseLeave={() => setPaletteMenuOpen(false)}
+            onFocus={() => setPaletteMenuOpen(true)}
+            onBlur={() => setPaletteMenuOpen(false)}
+            className="relative"
+          >
             <button
-              key={option.id}
               type="button"
-              aria-label={`Switch to ${option.name} palette`}
-              onClick={() => setActivePalette(option)}
-              title={option.name}
-              className={`h-5 w-5 rounded-full border-2 transition ${activePalette.id === option.id ? 'scale-110 border-white' : 'border-white/35'}`}
-              style={{
-                background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)`,
-                boxShadow: activePalette.id === option.id ? `0 0 0 2px ${option.colors.secondarySoft}` : 'none',
-              }}
-            />
-          ))}
+              aria-label="Palette options"
+              className="flex items-center gap-2 rounded-full bg-[var(--brand-primary)]/60 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-secondary)] transition hover:bg-[var(--brand-primary-soft)]"
+            >
+              <span>Palette</span>
+              <ChevronDown size={12} />
+            </button>
+
+            <AnimatePresence>
+              {paletteMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="absolute right-0 top-[calc(100%+0.75rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary-deep)]/90 p-2 shadow-[0_14px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl"
+                >
+                  {paletteOptions.map((option) => (
+                    <button
+                      key={`hover-${option.id}`}
+                      type="button"
+                      aria-label={`Switch to ${option.name} palette`}
+                      onClick={() => {
+                        setActivePalette(option)
+                        setPaletteMenuOpen(false)
+                      }}
+                      title={option.name}
+                      className="h-5 w-5 rounded-full border border-white/50 transition hover:scale-110"
+                      style={{ background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)` }}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div className="relative md:hidden">
+          <div
+            onMouseEnter={() => setPaletteMenuOpen(true)}
+            onMouseLeave={() => setPaletteMenuOpen(false)}
+            onFocus={() => setPaletteMenuOpen(true)}
+            onBlur={() => setPaletteMenuOpen(false)}
+            className="relative"
+          >
+            <button
+              type="button"
+              aria-label="Palette options"
+              className="flex items-center gap-1 rounded-full bg-[var(--brand-primary)]/60 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.2em] text-[var(--brand-secondary)]"
+            >
+              <span>Palette</span>
+              <ChevronDown size={12} />
+            </button>
+
+            <AnimatePresence>
+              {paletteMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="absolute right-0 top-[calc(100%+0.5rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary-deep)]/90 p-2 shadow-[0_12px_24px_rgba(0,0,0,0.15)] backdrop-blur-xl"
+                >
+                  {paletteOptions.map((option) => (
+                    <button
+                      key={`mobile-hover-${option.id}`}
+                      type="button"
+                      aria-label={`Switch to ${option.name} palette`}
+                      onClick={() => {
+                        setActivePalette(option)
+                        setPaletteMenuOpen(false)
+                      }}
+                      title={option.name}
+                      className="h-4 w-4 rounded-full border border-white/50 transition hover:scale-110"
+                      style={{ background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)` }}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </nav>
 
-      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-40">
-        <button type="button" aria-label="Open menu" className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/85 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95" onClick={() => setMenuOpen((value) => !value)}>
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-40 flex items-center justify-center">
+        <button type="button" aria-label="Open menu" className="flex h-[3.1rem] w-[3.1rem] items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/85 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-12 sm:w-12" onClick={() => setMenuOpen((value) => !value)}>
           <Menu size={18} />
         </button>
       </div>
 
-      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 flex items-center gap-3">
-        <button type="button" aria-label={music.isPlaying ? 'Pause music' : 'Play music'} onClick={music.toggle} className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/85 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95">
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 flex items-center justify-center">
+        <button type="button" aria-label={music.isPlaying ? 'Pause music' : 'Play music'} onClick={music.toggle} className="flex h-[3.1rem] w-[3.1rem] items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/90 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-12 sm:w-12">
           {music.isPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </button>
       </div>
@@ -361,20 +439,38 @@ function App() {
                 </a>
               ))}
             </div>
-            <div className="mt-4 flex items-center justify-between gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/60 px-3 py-2">
-              <span className="text-[10px] uppercase tracking-[0.26em] text-[var(--brand-secondary)]">Palette</span>
-              <div className="flex items-center gap-2">
-                {paletteOptions.map((option) => (
-                  <button
-                    key={`mobile-${option.id}`}
-                    type="button"
-                    aria-label={`Switch to ${option.name} palette`}
-                    onClick={() => { setActivePalette(option); setMenuOpen(false) }}
-                    className={`h-4 w-4 rounded-full border-2 ${activePalette.id === option.id ? 'border-white' : 'border-white/40'}`}
-                    style={{ background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)` }}
-                  />
-                ))}
-              </div>
+            <div className="mt-4 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/60 px-3 py-2">
+              <button
+                type="button"
+                onClick={() => setPaletteMenuOpen((value) => !value)}
+                className="flex w-full items-center justify-between gap-2 text-[10px] uppercase tracking-[0.26em] text-[var(--brand-secondary)]"
+              >
+                <span>Palette</span>
+                <ChevronDown size={12} />
+              </button>
+
+              <AnimatePresence>
+                {paletteMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="mt-3 flex flex-wrap items-center gap-2 overflow-hidden"
+                  >
+                    {paletteOptions.map((option) => (
+                      <button
+                        key={`mobile-menu-${option.id}`}
+                        type="button"
+                        aria-label={`Switch to ${option.name} palette`}
+                        onClick={() => { setActivePalette(option); setMenuOpen(false); setPaletteMenuOpen(false) }}
+                        className={`h-4 w-4 rounded-full border-2 ${activePalette.id === option.id ? 'border-white' : 'border-white/40'}`}
+                        style={{ background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)` }}
+                      />
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
