@@ -6,6 +6,7 @@ import {
     ChevronUp,
     Clock3,
     Copy,
+    Heart,
     MapPin,
     Menu,
     Share2,
@@ -76,19 +77,6 @@ const paletteOptions: PaletteOption[] = [
       secondarySoft: '#f2dfb4',
       neutral: '#f8f4f1',
       neutralSoft: '#efe3db',
-    },
-  },
-  {
-    id: 'blue-orange',
-    name: 'Blue & Orange',
-    colors: {
-      primary: '#183d73',
-      primaryDeep: '#0f2745',
-      primarySoft: '#3d6db1',
-      secondary: '#f29a4b',
-      secondarySoft: '#f8d5aa',
-      neutral: '#f4efe8',
-      neutralSoft: '#e8dfd2',
     },
   },
   {
@@ -595,19 +583,11 @@ function App() {
               </motion.section>
 
               <section className="relative">
-                <div className="mb-8 text-center">
-                  <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)] md:text-5xl">Blessing &amp; Guidance</h3>
-                </div>
-                <motion.div initial={{ opacity: 0, y: 28, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary)]/70 p-6 text-center shadow-[0_24px_70px_rgba(0,0,0,0.18)] md:p-10">
-                  <p className="font-[Georgia] text-lg leading-9 text-[var(--brand-neutral)] md:text-2xl">“{wedding.quranVerse.translation}”</p>
-                  <p className="mt-6 font-[Georgia] text-2xl text-[var(--brand-secondary)]">{wedding.quranVerse.reference}</p>
-                  <p className="mt-3 text-sm uppercase tracking-[0.32em] text-[var(--brand-neutral)]/80">{wedding.quranVerse.arabic}</p>
-                </motion.div>
-              </section>
-
-              <section className="relative">
                 <div className="mb-10 text-center">
                   <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)] md:text-5xl">Counting Down To Our Big Day</h3>
+                  <div className="mt-4 flex justify-center">
+                    <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {[
@@ -629,6 +609,9 @@ function App() {
               <section id="events" className="relative">
                 <div className="mb-10 text-center">
                   <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)] md:text-5xl">Events</h3>
+                  <div className="mt-4 flex justify-center">
+                    <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+                  </div>
                 </div>
                 <div className="relative mx-auto max-w-3xl">
                   <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-gradient-to-b from-[var(--brand-secondary)] via-[var(--brand-secondary)]/70 to-transparent md:block" />
@@ -661,141 +644,170 @@ function App() {
               </section>
 
               <section id="venue" className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-primary-deep)]/95 p-5 text-[var(--brand-neutral)] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-8">
-                  <div className="mb-5 flex items-center gap-3">
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="p-0 text-[var(--brand-neutral)]">
+                  <div className="mb-5 flex items-center justify-center gap-3 text-center">
                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[var(--brand-neutral)]">
                       <MapPin size={18} />
                     </div>
-                    <div>
-                      <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)]">Venue</h3>
-                    </div>
+                    <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)]">Venue</h3>
                   </div>
-                  <div className="rounded-[1.5rem] border border-[var(--brand-secondary)]/30 bg-[linear-gradient(135deg,var(--brand-primary),var(--brand-primary-soft))] p-1">
-                    <div className="flex h-56 items-center justify-center rounded-[1.2rem] bg-[radial-gradient(circle_at_center,var(--brand-secondary-soft)_0%,var(--brand-secondary)_25%,var(--brand-primary-soft)_60%,var(--brand-primary-deep)_100%)] text-[var(--brand-neutral)] md:h-72">
+                  <div className="mb-5 flex justify-center">
+                    <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary-deep)]/35 p-4 md:p-5">
+                    <p className="mb-4 text-left text-base leading-7 text-[var(--brand-neutral)]">We would be delighted to celebrate with you at this special gathering.</p>
+                    <div className="flex h-56 items-center justify-center rounded-[1.2rem] bg-transparent text-[var(--brand-neutral)] md:h-72">
                       <div className="flex flex-col items-center gap-3 text-center">
-                        <MapPin size={34} />
-                        <p className="font-[Georgia] text-3xl">{wedding.venue.name}</p>
-                        <p className="text-sm uppercase tracking-[0.28em]">Map Preview</p>
+                        <MapPin size={34} className="text-[var(--brand-secondary)]" />
+                        <p className="font-[Georgia] text-3xl text-[var(--brand-secondary)]">{wedding.venue.name}</p>
+                        <p className="text-sm uppercase tracking-[0.28em] text-[var(--brand-neutral)]">Map Preview</p>
                       </div>
                     </div>
-                  </div>
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.3em] text-[var(--brand-secondary)]">Address</p>
-                      <p className="mt-2 text-base text-[var(--brand-neutral)]">{wedding.venue.address}</p>
-                      <p className="text-base text-[var(--brand-neutral)]">{wedding.venue.city}</p>
-                      <p className="text-base text-[var(--brand-neutral)]">{wedding.venue.country}</p>
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                      <div className="rounded-[1.1rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary)]/20 p-4">
+                        <p className="text-sm uppercase tracking-[0.3em] text-[var(--brand-secondary)]">Address</p>
+                        <p className="mt-2 text-base text-[var(--brand-neutral)]">{wedding.venue.address}</p>
+                        <p className="text-base text-[var(--brand-neutral)]">{wedding.venue.city}</p>
+                        <p className="text-base text-[var(--brand-neutral)]">{wedding.venue.country}</p>
+                      </div>
+                      <div className="space-y-3 rounded-[1.1rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary)]/20 p-4">
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.3em] text-[var(--brand-secondary)]">Parking</p>
+                          <p className="mt-2 text-sm leading-6 text-[var(--brand-neutral)]/80">{wedding.venue.parking}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.24em] text-[var(--brand-secondary)]">Dress code</p>
+                          <p className="mt-2 text-sm leading-6 text-[var(--brand-neutral)]/80">{wedding.venue.dressCode}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-3">
-                      <p className="text-sm uppercase tracking-[0.3em] text-[var(--brand-secondary)]">Parking</p>
-                      <p className="text-sm leading-6 text-[var(--brand-neutral)]/80">{wedding.venue.parking}</p>
-                      <p className="text-sm uppercase tracking-[0.24em] text-[var(--brand-secondary)]">Dress code</p>
-                      <p className="text-sm leading-6 text-[var(--brand-neutral)]/80">{wedding.venue.dressCode}</p>
+
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <a href={wedding.venue.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-3 text-sm tracking-[0.18em] text-[var(--brand-neutral)] uppercase shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)]">
+                        Get Directions
+                      </a>
+                      <a href={calendarUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-secondary-soft)] px-5 py-3 text-sm tracking-[0.18em] text-[var(--brand-primary-deep)] uppercase shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-secondary-soft)] hover:text-[var(--brand-primary-deep)]">
+                        Add to Calendar
+                      </a>
                     </div>
-                  </div>
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <a href={wedding.venue.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-3 text-sm tracking-[0.18em] text-[var(--brand-neutral)] uppercase shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)]">
-                      Get Directions
-                    </a>
-                    <a href={calendarUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-secondary-soft)] px-5 py-3 text-sm tracking-[0.18em] text-[var(--brand-primary-deep)] uppercase shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-secondary-soft)] hover:text-[var(--brand-primary-deep)]">
-                      Add to Calendar
-                    </a>
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-primary)]/85 p-5 text-[var(--brand-neutral)] shadow-[0_25px_60px_rgba(0,0,0,0.15)] md:p-8">
-                  <div className="flex items-center gap-3">
-                    <Share2 size={18} className="text-[var(--brand-neutral)]" />
-                    <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)]">Share Invitation</h3>
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="p-0 text-[var(--brand-neutral)]">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <div className="flex items-center gap-3">
+                      <Share2 size={18} className="text-[var(--brand-neutral)]" />
+                      <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)]">Share Invitation</h3>
+                    </div>
+                    <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
                   </div>
-                  <div className="mt-8 space-y-3">
-                    <button type="button" onClick={() => handleShare('whatsapp')} className="flex w-full items-center justify-between rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-left text-[var(--brand-neutral)]">
-                      <span className="flex items-center gap-3"><Share2 size={16} /> WhatsApp</span>
-                      <ArrowRight size={16} />
-                    </button>
-                    <button type="button" onClick={() => handleShare('copy')} className="flex w-full items-center justify-between rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-left text-[var(--brand-neutral)]">
-                      <span className="flex items-center gap-3"><Copy size={16} /> Copy Link</span>
-                      <ArrowRight size={16} />
-                    </button>
-                    <button type="button" onClick={() => handleShare('native')} className="flex w-full items-center justify-between rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-left text-[var(--brand-neutral)]">
-                      <span className="flex items-center gap-3"><Share2 size={16} /> Share</span>
-                      <ArrowRight size={16} />
-                    </button>
-                  </div>
-                  {shareStatus && <p className="mt-4 text-sm text-[var(--brand-secondary-soft)]">{shareStatus}</p>}
-                  <div className="mt-8 flex flex-wrap gap-3">
-                    <button type="button" onClick={() => window.open(calendarUrl, '_blank', 'noopener,noreferrer')} className="rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/5 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-neutral)]/5 hover:text-[var(--brand-neutral)]">
-                      Google Calendar
-                    </button>
-                    <button type="button" onClick={handleIcsDownload} className="rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/5 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-neutral)]/5 hover:text-[var(--brand-neutral)]">
-                      Download .ics
-                    </button>
+
+                  <div className="mt-8 rounded-[1.5rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary)]/55 p-4 md:p-5">
+                    <p className="mb-4 text-left text-base leading-7 text-[var(--brand-neutral)]">Help us spread the joy and share this beautiful moment with your loved ones.</p>
+                    <div className="space-y-3">
+                      <button type="button" onClick={() => handleShare('whatsapp')} className="flex w-full items-center justify-between rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-left text-[var(--brand-neutral)]">
+                        <span className="flex items-center gap-3"><Share2 size={16} /> WhatsApp</span>
+                        <ArrowRight size={16} />
+                      </button>
+                      <button type="button" onClick={() => handleShare('copy')} className="flex w-full items-center justify-between rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-left text-[var(--brand-neutral)]">
+                        <span className="flex items-center gap-3"><Copy size={16} /> Copy Link</span>
+                        <ArrowRight size={16} />
+                      </button>
+                      <button type="button" onClick={() => handleShare('native')} className="flex w-full items-center justify-between rounded-2xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 px-4 py-3 text-left text-[var(--brand-neutral)]">
+                        <span className="flex items-center gap-3"><Share2 size={16} /> Share</span>
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                    {shareStatus && <p className="mt-4 text-sm text-[var(--brand-secondary-soft)]">{shareStatus}</p>}
+                    <div className="mt-8 flex flex-wrap gap-3">
+                      <button type="button" onClick={() => window.open(calendarUrl, '_blank', 'noopener,noreferrer')} className="rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/5 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-neutral)]/5 hover:text-[var(--brand-neutral)]">
+                        Google Calendar
+                      </button>
+                      <button type="button" onClick={handleIcsDownload} className="rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/5 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-neutral)]/5 hover:text-[var(--brand-neutral)]">
+                        Download .ics
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               </section>
 
               <section id="rsvp" className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-neutral)]/95 p-5 text-[var(--brand-neutral)] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-8">
-                  <p className="font-[Georgia] text-xl uppercase tracking-[0.35em] text-[var(--brand-secondary)] md:text-2xl">RSVP</p>
-                  <p className="mt-4 text-base leading-7 text-[var(--brand-neutral)]">Your presence would make our celebration even more special. Kindly let us know if you&apos;ll be joining us.</p>
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="p-0 text-[var(--brand-neutral)]">
+                  <div className="mb-3 flex flex-col items-center gap-3 text-center">
+                    <p className="flex items-center gap-3 font-[Georgia] text-xl uppercase tracking-[0.35em] text-[var(--brand-secondary)] md:text-2xl"><CalendarClock size={18} className="text-white" /><span>RSVP</span></p>
+                    <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+                  </div>
 
-                  <div className="mt-6 space-y-5">
-                    <div>
-                      <label htmlFor="guestName" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Your Name</label>
-                      <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
-                    </div>
+                  <div className="rounded-[1.5rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-neutral)]/95 p-4 md:p-6">
+                    <p className="text-base leading-7 text-[var(--brand-neutral)]">Your presence would make our celebration even more special. Kindly let us know if you&apos;ll be joining us.</p>
 
-                    <div>
-                      <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Will you be attending?</p>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <button type="button" onClick={() => setAttending('yes')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'yes' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
-                          ✓ Yes, I&apos;ll be there
-                        </button>
-                        <button type="button" onClick={() => setAttending('no')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'no' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
-                          ✕ Sorry, I can&apos;t make it
-                        </button>
-                      </div>
-                    </div>
-
-                    {attending === 'yes' && (
+                    <div className="mt-6 space-y-5">
                       <div>
-                        <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Number of Guests</p>
-                        <div className="flex w-fit items-center rounded-full border p-2" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>
-                          <button type="button" aria-label="Decrease guests" onClick={() => setGuests((value) => Math.max(1, value - 1))} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>-</button>
-                          <span className="w-12 text-center text-lg font-medium" style={{ color: activePalette.colors.neutral }}>{guests}</span>
-                          <button type="button" aria-label="Increase guests" onClick={() => setGuests((value) => value + 1)} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>+</button>
+                        <label htmlFor="guestName" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Your Name</label>
+                        <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
+                      </div>
+
+                      <div>
+                        <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Will you be attending?</p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <button type="button" onClick={() => setAttending('yes')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'yes' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
+                            ✓ Yes, I&apos;ll be there
+                          </button>
+                          <button type="button" onClick={() => setAttending('no')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'no' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
+                            ✕ Sorry, I can&apos;t make it
+                          </button>
                         </div>
                       </div>
-                    )}
 
-                    <div>
-                      <label htmlFor="message" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Leave a message for the couple</label>
-                      <textarea id="message" value={message} onChange={(event) => setMessage(event.target.value)} rows={4} placeholder="Your message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
+                      {attending === 'yes' && (
+                        <div>
+                          <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Number of Guests</p>
+                          <div className="flex w-fit items-center rounded-full border p-2" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>
+                            <button type="button" aria-label="Decrease guests" onClick={() => setGuests((value) => Math.max(1, value - 1))} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>-</button>
+                            <span className="w-12 text-center text-lg font-medium" style={{ color: activePalette.colors.neutral }}>{guests}</span>
+                            <button type="button" aria-label="Increase guests" onClick={() => setGuests((value) => value + 1)} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>+</button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <label htmlFor="message" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Leave a message for the couple</label>
+                        <textarea id="message" value={message} onChange={(event) => setMessage(event.target.value)} rows={4} placeholder="Your message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
+                      </div>
+
+                      <button type="button" onClick={handleSubmitRSVP} className="inline-flex w-full items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-4 text-sm uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-lg shadow-black/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)]">
+                        Send RSVP
+                      </button>
                     </div>
-
-                    <button type="button" onClick={handleSubmitRSVP} className="inline-flex w-full items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-4 text-sm uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-lg shadow-black/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)]">
-                      Send RSVP
-                    </button>
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[2rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-primary)]/85 p-5 text-[var(--brand-neutral)] shadow-[0_25px_60px_rgba(0,0,0,0.15)] md:p-8">
-                  <p className="font-[Georgia] text-xl uppercase tracking-[0.35em] text-[var(--brand-secondary)] md:text-2xl">Guest wishes</p>
-                  <div className="mt-6 space-y-3">
-                    {wishes.map((wish) => (
-                      <div key={`${wish.name}-${wish.text}`} className="rounded-[1.25rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-neutral)]/8 p-4 text-[var(--brand-neutral)]">
-                        <p className="text-base leading-7 text-[var(--brand-neutral)]">“{wish.text}”</p>
-                        <p className="mt-3 text-sm uppercase tracking-[0.18em] text-[var(--brand-secondary)]">— {wish.name}</p>
-                      </div>
-                    ))}
+                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="p-0 text-[var(--brand-neutral)]">
+                  <div className="mb-3 flex flex-col items-center gap-3 text-center">
+                    <p className="flex items-center gap-3 font-[Georgia] text-xl uppercase tracking-[0.35em] text-[var(--brand-secondary)] md:text-2xl"><Heart size={18} className="text-white" /><span>Guest wishes</span></p>
+                    <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
                   </div>
 
-                  <div className="mt-8 space-y-3">
-                    <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
-                    <textarea value={wishText} onChange={(event) => setWishText(event.target.value)} rows={3} placeholder="Leave a dua or message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
-                    <button type="button" onClick={addWish} className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/10 px-4 py-3 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)] transition-all duration-300 ease-out hover:scale-[1.025] hover:border-[var(--brand-secondary)]">
-                      Add Wish
-                    </button>
+                  <div className="rounded-[1.5rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary)]/55 p-4 md:p-5">
+                    <p className="mb-4 text-left text-base leading-7 text-[var(--brand-neutral)]">Your duas and words of love mean the world to us.</p>
+                    <div className="space-y-3">
+                      {wishes.map((wish) => (
+                        <div key={`${wish.name}-${wish.text}`} className="rounded-[1.25rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-neutral)]/8 p-4 text-[var(--brand-neutral)]">
+                          <p className="text-base leading-7 text-[var(--brand-neutral)]">“{wish.text}”</p>
+                          <p className="mt-3 text-sm uppercase tracking-[0.18em] text-[var(--brand-secondary)]">— {wish.name}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 space-y-3">
+                      <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
+                      <textarea value={wishText} onChange={(event) => setWishText(event.target.value)} rows={3} placeholder="Leave a dua or message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
+                      <button type="button" onClick={addWish} className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/10 px-4 py-3 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)] transition-all duration-300 ease-out hover:scale-[1.025] hover:border-[var(--brand-secondary)]">
+                        Add Wish
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               </section>

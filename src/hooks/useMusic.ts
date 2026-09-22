@@ -16,6 +16,8 @@ export function useMusic(src: string, enabled: boolean) {
       audio.volume = 0.35
       audio.preload = 'auto'
       audio.crossOrigin = 'anonymous'
+      audio.setAttribute('playsinline', 'true')
+      audio.setAttribute('webkit-playsinline', 'true')
 
       const handleCanPlay = () => setIsReady(true)
       const handleError = () => {

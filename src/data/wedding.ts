@@ -1,3 +1,5 @@
+import ashaduallaha from '/ashaduallaha.mp3'
+
 export type WeddingEvent = {
   name: string
   date: string
@@ -85,7 +87,7 @@ export const wedding = {
   },
   music: {
     enabled: true,
-    src: '/ashaduallaha.mp3',
+    src: ashaduallaha,
   },
   share: {
     message:
