@@ -773,10 +773,46 @@ function App() {
                       <div>
                         <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Will you be attending?</p>
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <button type="button" onClick={() => setAttending('yes')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'yes' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
+                          <button
+                            type="button"
+                            onClick={() => setAttending('yes')}
+                            className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025] active:scale-[0.99] active:brightness-90"
+                            style={
+                              attending === 'yes'
+                                ? {
+                                    backgroundColor: activePalette.colors.primaryDeep,
+                                    borderColor: activePalette.colors.secondary,
+                                    color: activePalette.colors.neutral,
+                                    boxShadow: `inset 0 0 0 1px ${activePalette.colors.secondary}55`,
+                                  }
+                                : {
+                                    backgroundColor: activePalette.colors.primary,
+                                    borderColor: activePalette.colors.secondary,
+                                    color: activePalette.colors.neutral,
+                                  }
+                            }
+                          >
                             ✓ Yes, I&apos;ll be there
                           </button>
-                          <button type="button" onClick={() => setAttending('no')} className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025]" style={attending === 'no' ? { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral } : { backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}>
+                          <button
+                            type="button"
+                            onClick={() => setAttending('no')}
+                            className="rounded-2xl border px-4 py-3 text-left text-base transition duration-200 hover:scale-[1.025] active:scale-[0.99] active:brightness-90"
+                            style={
+                              attending === 'no'
+                                ? {
+                                    backgroundColor: activePalette.colors.primaryDeep,
+                                    borderColor: activePalette.colors.secondary,
+                                    color: activePalette.colors.neutral,
+                                    boxShadow: `inset 0 0 0 1px ${activePalette.colors.secondary}55`,
+                                  }
+                                : {
+                                    backgroundColor: activePalette.colors.primary,
+                                    borderColor: activePalette.colors.secondary,
+                                    color: activePalette.colors.neutral,
+                                  }
+                            }
+                          >
                             ✕ Sorry, I can&apos;t make it
                           </button>
                         </div>
@@ -786,9 +822,25 @@ function App() {
                         <div>
                           <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Number of Guests</p>
                           <div className="flex w-fit items-center rounded-full border p-2" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>
-                            <button type="button" aria-label="Decrease guests" onClick={() => setGuests((value) => Math.max(1, value - 1))} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>-</button>
+                            <button
+                              type="button"
+                              aria-label="Decrease guests"
+                              onClick={() => setGuests((value) => Math.max(1, value - 1))}
+                              className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)] transition duration-150 active:scale-[0.96] active:brightness-90"
+                              style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}
+                            >
+                              -
+                            </button>
                             <span className="w-12 text-center text-lg font-medium" style={{ color: activePalette.colors.neutral }}>{guests}</span>
-                            <button type="button" aria-label="Increase guests" onClick={() => setGuests((value) => value + 1)} className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)]" style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}>+</button>
+                            <button
+                              type="button"
+                              aria-label="Increase guests"
+                              onClick={() => setGuests((value) => value + 1)}
+                              className="flex h-10 w-10 items-center justify-center rounded-full border text-[var(--brand-neutral)] transition duration-150 active:scale-[0.96] active:brightness-90"
+                              style={{ backgroundColor: activePalette.colors.primary, borderColor: activePalette.colors.secondary }}
+                            >
+                              +
+                            </button>
                           </div>
                         </div>
                       )}
