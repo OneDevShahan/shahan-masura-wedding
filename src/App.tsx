@@ -1,19 +1,20 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-    ArrowRight,
-    CalendarClock,
-    ChevronDown,
-    ChevronUp,
-    Clock3,
-    Copy,
-    Heart,
-    MapPin,
-    Menu,
-    Share2,
-    Sparkles,
-    Volume2,
-    VolumeX,
-    X,
+  ArrowRight,
+  CalendarClock,
+  ChevronDown,
+  ChevronUp,
+  Clock3,
+  Copy,
+  Heart,
+  LoaderCircle,
+  MapPin,
+  Menu,
+  Share2,
+  Sparkles,
+  Volume2,
+  VolumeX,
+  X
 } from 'lucide-react'
 import { useEffect, useState, type CSSProperties } from 'react'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
@@ -120,6 +121,9 @@ function App() {
   const [wishes, setWishes] = useState<WishMessage[]>(initialWishes)
   const [wishName, setWishName] = useState('')
   const [wishText, setWishText] = useState('')
+  const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false)
+  const [isSubmittingWish, setIsSubmittingWish] = useState(false)
+  const [visitorCount, setVisitorCount] = useState(1)
   const [showTopButton, setShowTopButton] = useState(false)
   const [showWelcomeHint, setShowWelcomeHint] = useState(false)
   const [invitationState, setInvitationState] = useState<'idle' | 'welcome'>('idle')
@@ -128,6 +132,20 @@ function App() {
 
   const countdown = useCountdown(wedding.date.iso)
   const music = useMusic(wedding.music.src, wedding.music.enabled)
+
+  useEffect(() => {
+    const storageKey = 'wedding-visitor-count'
+    const savedValue = Number(window.localStorage.getItem(storageKey) ?? '0')
+
+    if (!savedValue) {
+      const nextValue = 1
+      window.localStorage.setItem(storageKey, String(nextValue))
+      setVisitorCount(nextValue)
+      return
+    }
+
+    setVisitorCount(savedValue)
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setShowTopButton(window.scrollY > 260)
@@ -179,6 +197,8 @@ function App() {
       return
     }
 
+    setIsSubmittingRsvp(true)
+
     try {
       const result = await submitRSVP({
         name: trimmedName,
@@ -198,6 +218,8 @@ function App() {
     } catch (error) {
       const messageText = error instanceof Error ? error.message : 'Something went wrong. Please try again.'
       setRsvpState({ success: false, name: '', message: messageText })
+    } finally {
+      setIsSubmittingRsvp(false)
     }
   }
 
@@ -206,6 +228,8 @@ function App() {
     const cleanText = wishText.trim()
     if (!cleanName || !cleanText) return
 
+    setIsSubmittingWish(true)
+
     try {
       await submitWish({ name: cleanName, text: cleanText })
       setWishName('')
@@ -213,6 +237,8 @@ function App() {
     } catch (error) {
       const messageText = error instanceof Error ? error.message : 'Could not save your wish. Please try again.'
       setRsvpState({ success: false, name: '', message: messageText })
+    } finally {
+      setIsSubmittingWish(false)
     }
   }
 
@@ -850,8 +876,20 @@ function App() {
                         <textarea id="message" value={message} onChange={(event) => setMessage(event.target.value)} rows={4} placeholder="Your message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
                       </div>
 
-                      <button type="button" onClick={handleSubmitRSVP} className="inline-flex w-full items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-4 text-sm uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-lg shadow-black/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)]">
-                        Send RSVP
+                      <button
+                        type="button"
+                        onClick={handleSubmitRSVP}
+                        disabled={isSubmittingRsvp}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-4 text-sm uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-lg shadow-black/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)] disabled:cursor-not-allowed disabled:opacity-75"
+                      >
+                        {isSubmittingRsvp ? (
+                          <>
+                            <LoaderCircle size={16} className="animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          'Send RSVP'
+                        )}
                       </button>
                     </div>
                   </div>
@@ -877,8 +915,20 @@ function App() {
                     <div className="mt-8 space-y-3">
                       <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
                       <textarea value={wishText} onChange={(event) => setWishText(event.target.value)} rows={3} placeholder="Leave a dua or message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
-                      <button type="button" onClick={addWish} className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/10 px-4 py-3 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)] transition-all duration-300 ease-out hover:scale-[1.025] hover:border-[var(--brand-secondary)]">
-                        Add Wish
+                      <button
+                        type="button"
+                        onClick={addWish}
+                        disabled={isSubmittingWish}
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/10 px-4 py-3 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)] transition-all duration-300 ease-out hover:scale-[1.025] hover:border-[var(--brand-secondary)] disabled:cursor-not-allowed disabled:opacity-75"
+                      >
+                        {isSubmittingWish ? (
+                          <>
+                            <LoaderCircle size={16} className="animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Add Wish'
+                        )}
                       </button>
                     </div>
                   </div>
@@ -935,6 +985,31 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
+        <footer className="bg-[var(--brand-primary-deep)]/80 px-4 pb-8 pt-6 backdrop-blur-sm">
+  <div className="mx-auto flex max-w-xl flex-col items-center">
+    {/* Visitor counter */}
+    <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.28em] text-[var(--brand-neutral)]/45">
+      <span>Guests visited</span>
+      <span className="font-semibold tabular-nums text-[var(--brand-secondary)]">
+        {visitorCount}
+      </span>
+    </div>
+    {/* Built with divider */}
+    <div className="mt-4 flex w-full items-center justify-center gap-3">
+      <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+      <div className="flex shrink-0 items-center gap-1.5 text-[10px] tracking-[0.18em] text-[var(--brand-neutral)]/60">
+        <span>Built with</span>
+        <Heart
+          size={12}
+          fill="currentColor"
+          className="text-red-500"
+        />
+        <span>@{new Date().getFullYear()}</span>
+      </div>
+      <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+    </div>
+  </div>
+</footer>
       </main>
     </div>
   )

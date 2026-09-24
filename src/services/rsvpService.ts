@@ -1,15 +1,15 @@
 import {
-  addDoc,
-  collection,
-  onSnapshot,
-  orderBy,
-  query,
-  Timestamp,
-  type Unsubscribe,
+    addDoc,
+    collection,
+    onSnapshot,
+    orderBy,
+    query,
+    Timestamp,
+    type Unsubscribe,
 } from 'firebase/firestore'
 
-import { db } from '../lib/firebase'
 import { initialWishes, type WishMessage } from '../data/wedding'
+import { db } from '../lib/firebase'
 
 export type RSVPStatus = 'yes' | 'no'
 

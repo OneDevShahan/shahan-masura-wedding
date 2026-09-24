@@ -96,16 +96,16 @@ Example:
 
 ```ts
 export const wedding = {
-  bride: { name: 'Your Bride Name' },
-  groom: { name: 'Your Groom Name' },
-  date: { gregorian: 'Saturday, 31 October 2026' },
+  bride: { name: "Your Bride Name" },
+  groom: { name: "Your Groom Name" },
+  date: { gregorian: "Saturday, 31 October 2026" },
   venue: {
-    name: 'Venue Name',
-    address: 'Street Address',
-    city: 'City',
-    country: 'Country',
+    name: "Venue Name",
+    address: "Street Address",
+    city: "City",
+    country: "Country",
   },
-}
+};
 ```
 
 ## Theme and Styling
