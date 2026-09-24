@@ -112,7 +112,7 @@ function App() {
   const [isOpened, setIsOpened] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [guestName, setGuestName] = useState('')
-  const [attending, setAttending] = useState<'yes' | 'no'>('yes')
+  const [attending, setAttending] = useState<'yes' | 'no' | ''>('')
   const [guests, setGuests] = useState(2)
   const [message, setMessage] = useState('')
   const [shareStatus, setShareStatus] = useState('')
@@ -190,38 +190,89 @@ function App() {
     }, 180)
   }
 
+  // const handleSubmitRSVP = async () => {
+  //   const trimmedName = guestName.trim()
+  //   if (!trimmedName) {
+  //     setRsvpState({ success: false, name: '', message: 'Please enter your name before sending the RSVP.' })
+  //     return
+  //   }
+
+  //   setIsSubmittingRsvp(true)
+
+  //   try {
+  //     const result = await submitRSVP({
+  //       name: trimmedName,
+  //       attending,
+  //       guests,
+  //       message,
+  //     })
+
+  //     setRsvpState({
+  //       success: true,
+  //       name: result.displayName,
+  //       message:
+  //         result.status === 'yes'
+  //           ? 'Thank you, ' + result.displayName + '! We look forward to celebrating with you.'
+  //           : 'Thank you for letting us know. Your duas and good wishes mean a lot to us.',
+  //     })
+  //   } catch (error) {
+  //     const messageText = error instanceof Error ? error.message : 'Something went wrong. Please try again.'
+  //     setRsvpState({ success: false, name: '', message: messageText })
+  //   } finally {
+  //     setIsSubmittingRsvp(false)
+  //   }
+  // }
   const handleSubmitRSVP = async () => {
-    const trimmedName = guestName.trim()
-    if (!trimmedName) {
-      setRsvpState({ success: false, name: '', message: 'Please enter your name before sending the RSVP.' })
-      return
-    }
+  const trimmedName = guestName.trim()
 
-    setIsSubmittingRsvp(true)
-
-    try {
-      const result = await submitRSVP({
-        name: trimmedName,
-        attending,
-        guests,
-        message,
-      })
-
-      setRsvpState({
-        success: true,
-        name: result.displayName,
-        message:
-          result.status === 'yes'
-            ? 'Thank you, ' + result.displayName + '! We look forward to celebrating with you.'
-            : 'Thank you for letting us know. Your duas and good wishes mean a lot to us.',
-      })
-    } catch (error) {
-      const messageText = error instanceof Error ? error.message : 'Something went wrong. Please try again.'
-      setRsvpState({ success: false, name: '', message: messageText })
-    } finally {
-      setIsSubmittingRsvp(false)
-    }
+  if (!trimmedName) {
+    setRsvpState({
+      success: false,
+      name: '',
+      message: 'Please enter your name before sending the RSVP.',
+    })
+    return
   }
+
+  setIsSubmittingRsvp(true)
+
+  try {
+    const result = await submitRSVP({
+      name: trimmedName,
+      attending,
+      guests,
+      message,
+    })
+
+    setRsvpState({
+      success: true,
+      name: result.displayName,
+      message:
+        result.status === 'yes'
+          ? 'Thank you, ' + result.displayName + '! We look forward to celebrating with you.'
+          : 'Thank you for letting us know. Your duas and good wishes mean a lot to us.',
+    })
+
+    // Clear RSVP form after successful submission
+    setGuestName('')
+    setAttending('')
+    setGuests(2)
+    setMessage('')
+  } catch (error) {
+    const messageText =
+      error instanceof Error
+        ? error.message
+        : 'Something went wrong. Please try again.'
+
+    setRsvpState({
+      success: false,
+      name: '',
+      message: messageText,
+    })
+  } finally {
+    setIsSubmittingRsvp(false)
+  }
+}
 
   const addWish = async () => {
     const cleanName = wishName.trim()
