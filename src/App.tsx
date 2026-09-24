@@ -18,10 +18,10 @@ import {
 import { useEffect, useState, type CSSProperties } from 'react'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
 import { Ornament } from './components/decorations/Ornament'
-import { initialWishes, navItems, wedding } from './data/wedding'
+import { initialWishes, navItems, wedding, type WishMessage } from './data/wedding'
 import { useCountdown } from './hooks/useCountdown'
 import { useMusic } from './hooks/useMusic'
-import { submitRSVP } from './services/rsvpService'
+import { submitRSVP, submitWish, subscribeToRSVPs, subscribeToWishes } from './services/rsvpService'
 import { getGoogleCalendarLink, getIcsContent } from './utils/calendar'
 import { copyToClipboard, getWhatsAppShareUrl } from './utils/share'
 
@@ -116,7 +116,8 @@ function App() {
   const [message, setMessage] = useState('')
   const [shareStatus, setShareStatus] = useState('')
   const [rsvpState, setRsvpState] = useState<{ success: boolean; message: string; name: string } | null>(null)
-  const [wishes, setWishes] = useState(initialWishes)
+  const [rsvpCount, setRsvpCount] = useState(0)
+  const [wishes, setWishes] = useState<WishMessage[]>(initialWishes)
   const [wishName, setWishName] = useState('')
   const [wishText, setWishText] = useState('')
   const [showTopButton, setShowTopButton] = useState(false)
@@ -133,6 +134,16 @@ function App() {
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToRSVPs((count) => setRsvpCount(count))
+    return () => unsubscribe?.()
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToWishes((items) => setWishes(items))
+    return () => unsubscribe?.()
   }, [])
 
   const scrollToTop = () => {
@@ -190,14 +201,19 @@ function App() {
     }
   }
 
-  const addWish = () => {
+  const addWish = async () => {
     const cleanName = wishName.trim()
     const cleanText = wishText.trim()
     if (!cleanName || !cleanText) return
 
-    setWishes((current) => [{ name: cleanName, text: cleanText }, ...current])
-    setWishName('')
-    setWishText('')
+    try {
+      await submitWish({ name: cleanName, text: cleanText })
+      setWishName('')
+      setWishText('')
+    } catch (error) {
+      const messageText = error instanceof Error ? error.message : 'Could not save your wish. Please try again.'
+      setRsvpState({ success: false, name: '', message: messageText })
+    }
   }
 
   const handleShare = async (type: 'whatsapp' | 'copy' | 'native') => {
@@ -744,6 +760,11 @@ function App() {
                     <p className="text-base leading-7 text-[var(--brand-neutral)]">Your presence would make our celebration even more special. Kindly let us know if you&apos;ll be joining us.</p>
 
                     <div className="mt-6 space-y-5">
+                      <div className="rounded-[1rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary)]/5 p-3">
+                        <p className="text-xs uppercase tracking-[0.25em] text-[var(--brand-secondary)]">Current RSVP count</p>
+                        <p className="mt-2 text-2xl font-[Georgia] text-[var(--brand-neutral)]">{rsvpCount}</p>
+                      </div>
+
                       <div>
                         <label htmlFor="guestName" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Your Name</label>
                         <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
@@ -792,7 +813,7 @@ function App() {
 
                   <div className="rounded-[1.5rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary)]/55 p-4 md:p-5">
                     <p className="mb-4 text-left text-base leading-7 text-[var(--brand-neutral)]">Your duas and words of love mean the world to us.</p>
-                    <div className="space-y-3">
+                    <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
                       {wishes.map((wish) => (
                         <div key={`${wish.name}-${wish.text}`} className="rounded-[1.25rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-neutral)]/8 p-4 text-[var(--brand-neutral)]">
                           <p className="text-base leading-7 text-[var(--brand-neutral)]">“{wish.text}”</p>
@@ -830,14 +851,32 @@ function App() {
 
         <AnimatePresence>
           {rsvpState && (
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} className="fixed inset-x-4 bottom-8 z-50 mx-auto max-w-md rounded-[1.5rem] border border-[#d8b46d]/30 bg-[#102d28]/90 p-4 text-[#f7f2e7] shadow-2xl backdrop-blur-xl">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              className="fixed inset-x-4 bottom-8 z-50 mx-auto max-w-md rounded-[1.5rem] border p-4 shadow-2xl backdrop-blur-xl"
+              style={{
+                backgroundColor: activePalette.colors.primaryDeep,
+                borderColor: activePalette.colors.secondary,
+                color: activePalette.colors.neutral,
+              }}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-2xl text-[#f2dba0]">✓</p>
-                  <h4 className="mt-2 font-[Georgia] text-2xl">Thank you, {rsvpState.name || 'friend'}!</h4>
-                  <p className="mt-2 text-sm leading-6 text-[#f5efea]">{rsvpState.message}</p>
+                  <p className="text-2xl" style={{ color: activePalette.colors.secondary }}>✓</p>
+                  <h4 className="mt-2 font-[Georgia] text-2xl" style={{ color: activePalette.colors.neutral }}>
+                    Thank you, {rsvpState.name || 'friend'}!
+                  </h4>
+                  <p className="mt-2 text-sm leading-6" style={{ color: activePalette.colors.secondarySoft }}>{rsvpState.message}</p>
                 </div>
-                <button type="button" aria-label="Dismiss RSVP notification" onClick={() => setRsvpState(null)} className="rounded-full border border-[#d7b779]/30 p-2">
+                <button
+                  type="button"
+                  aria-label="Dismiss RSVP notification"
+                  onClick={() => setRsvpState(null)}
+                  className="rounded-full border p-2"
+                  style={{ borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}
+                >
                   <X size={14} />
                 </button>
               </div>
