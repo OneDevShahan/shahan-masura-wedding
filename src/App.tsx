@@ -22,7 +22,14 @@ import { Ornament } from './components/decorations/Ornament'
 import { initialWishes, navItems, wedding, type WishMessage } from './data/wedding'
 import { useCountdown } from './hooks/useCountdown'
 import { useMusic } from './hooks/useMusic'
-import { submitRSVP, submitWish, subscribeToRSVPs, subscribeToWishes } from './services/rsvpService'
+import {
+  getRSVPCount,
+  getWishes,
+  registerVisitor,
+  submitRSVP,
+  submitWish,
+} from './services/rsvpService'
+
 import { getGoogleCalendarLink, getIcsContent } from './utils/calendar'
 import { copyToClipboard, getWhatsAppShareUrl } from './utils/share'
 
@@ -38,6 +45,10 @@ type PaletteOption = {
     neutral: string
     neutralSoft: string
   }
+}
+
+type DisplayWish = WishMessage & {
+  createdAt?: Date | null
 }
 
 const paletteOptions: PaletteOption[] = [
@@ -108,6 +119,59 @@ const paletteOptions: PaletteOption[] = [
   },
 ]
 
+function formatWishDate(
+  createdAt?: string | Date | null,
+) {
+  if (!createdAt) return ''
+
+  const date =
+    createdAt instanceof Date
+      ? createdAt
+      : new Date(createdAt)
+
+  if (Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  const parts = new Intl.DateTimeFormat('en-IN', {
+  timeZone: 'Asia/Kolkata',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+}).formatToParts(date)
+
+const day = Number(
+  parts.find((part) => part.type === 'day')?.value
+)
+
+const month =
+  parts.find((part) => part.type === 'month')?.value ?? ''
+
+const year =
+  parts.find((part) => part.type === 'year')?.value ?? ''
+
+  const time = new Intl.DateTimeFormat(
+    'en-IN',
+    {
+      timeZone: 'Asia/Kolkata',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    },
+  ).format(date)
+
+  const suffix =
+    day % 10 === 1 && day !== 11
+      ? 'st'
+      : day % 10 === 2 && day !== 12
+        ? 'nd'
+        : day % 10 === 3 && day !== 13
+          ? 'rd'
+          : 'th'
+
+  return `${time} · ${day}${suffix} ${month} ${year}`
+}
+
 function App() {
   const [isOpened, setIsOpened] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -118,12 +182,13 @@ function App() {
   const [shareStatus, setShareStatus] = useState('')
   const [rsvpState, setRsvpState] = useState<{ success: boolean; message: string; name: string } | null>(null)
   const [rsvpCount, setRsvpCount] = useState(0)
-  const [wishes, setWishes] = useState<WishMessage[]>(initialWishes)
+  const [wishes, setWishes] = useState<DisplayWish[]>(initialWishes,)
   const [wishName, setWishName] = useState('')
   const [wishText, setWishText] = useState('')
   const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false)
   const [isSubmittingWish, setIsSubmittingWish] = useState(false)
-  const [visitorCount, setVisitorCount] = useState(1)
+  const [visitorCount, setVisitorCount] = useState<number>(0)
+  const [visitorLoading, setVisitorLoading] = useState(true)
   const [showTopButton, setShowTopButton] = useState(false)
   const [showWelcomeHint, setShowWelcomeHint] = useState(false)
   const [invitationState, setInvitationState] = useState<'idle' | 'welcome'>('idle')
@@ -134,17 +199,40 @@ function App() {
   const music = useMusic(wedding.music.src, wedding.music.enabled)
 
   useEffect(() => {
-    const storageKey = 'wedding-visitor-count'
-    const savedValue = Number(window.localStorage.getItem(storageKey) ?? '0')
+    let cancelled = false
 
-    if (!savedValue) {
-      const nextValue = 1
-      window.localStorage.setItem(storageKey, String(nextValue))
-      setVisitorCount(nextValue)
-      return
+    const loadVisitorCount = async () => {
+      try {
+        setVisitorLoading(true)
+
+        const count = await registerVisitor()
+
+        if (!cancelled) {
+          setVisitorCount(count)
+        }
+      } catch (error) {
+        console.error(
+          'Could not register visitor:',
+          error,
+        )
+
+        if (!cancelled) {
+          // Keep the UI visible even if visitor
+          // registration fails.
+          setVisitorCount(0)
+        }
+      } finally {
+        if (!cancelled) {
+          setVisitorLoading(false)
+        }
+      }
     }
 
-    setVisitorCount(savedValue)
+    void loadVisitorCount()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -155,13 +243,39 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const unsubscribe = subscribeToRSVPs((count) => setRsvpCount(count))
-    return () => unsubscribe?.()
+    let cancelled = false
+
+    const loadRSVPCount = async () => {
+      const count = await getRSVPCount()
+
+      if (!cancelled) {
+        setRsvpCount(count)
+      }
+    }
+
+    void loadRSVPCount()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
-    const unsubscribe = subscribeToWishes((items) => setWishes(items))
-    return () => unsubscribe?.()
+    let cancelled = false
+
+    const loadWishes = async () => {
+      const items = await getWishes()
+
+      if (!cancelled) {
+        setWishes(items)
+      }
+    }
+
+    void loadWishes()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const scrollToTop = () => {
@@ -223,55 +337,62 @@ function App() {
   //   }
   // }
   const handleSubmitRSVP = async () => {
-  const trimmedName = guestName.trim()
+    const trimmedName = guestName.trim()
+    if (!trimmedName) {
+      setRsvpState({
+        success: false,
+        name: '',
+        message: 'Please enter your name before sending your RSVP.',
+      })
+      return
+    }
+    if (!attending) {
+      setRsvpState({
+        success: false,
+        name: '',
+        message: 'Please let us know whether you will be attending.',
+      })
+      return
+    }
+    setIsSubmittingRsvp(true)
 
-  if (!trimmedName) {
-    setRsvpState({
-      success: false,
-      name: '',
-      message: 'Please enter your name before sending the RSVP.',
-    })
-    return
-  }
+    try {
+      const result = await submitRSVP({
+        name: trimmedName,
+        attending,
+        guests,
+        message,
+      })
+      const updatedRsvpCount = await getRSVPCount()
+      setRsvpCount(updatedRsvpCount)
+      setRsvpState({
+        success: true,
+        name: result.displayName,
+        message:
+          result.status === 'yes'
+            ? 'Thank you, ' + result.displayName + '! We look forward to celebrating with you.'
+            : 'Thank you for letting us know. Your duas and good wishes mean a lot to us.',
+      })
 
-  setIsSubmittingRsvp(true)
+      // Clear RSVP form after successful submission
+      setGuestName('')
+      setAttending('')
+      setGuests(2)
+      setMessage('')
+    } catch (error) {
+      const messageText =
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong. Please try again.'
 
-  try {
-    const result = await submitRSVP({
-      name: trimmedName,
-      attending,
-      guests,
-      message,
-    })
-
-    setRsvpState({
-      success: true,
-      name: result.displayName,
-      message:
-        result.status === 'yes'
-          ? 'Thank you, ' + result.displayName + '! We look forward to celebrating with you.'
-          : 'Thank you for letting us know. Your duas and good wishes mean a lot to us.',
-    })
-
-    // Clear RSVP form after successful submission
-    setGuestName('')
-    setAttending('')
-    setGuests(2)
-    setMessage('')
-  } catch (error) {
-    const messageText =
-      error instanceof Error
-        ? error.message
-        : 'Something went wrong. Please try again.'
-
-    setRsvpState({
-      success: false,
-      name: '',
-      message: messageText,
-    })
-  } finally {
-    setIsSubmittingRsvp(false)
-  }
+      setRsvpState({
+        success: false,
+        name: '',
+        message: messageText,
+      })
+    } finally {
+      setIsSubmittingRsvp(false)
+    }
 }
 
   const addWish = async () => {
@@ -282,7 +403,9 @@ function App() {
     setIsSubmittingWish(true)
 
     try {
-      await submitWish({ name: cleanName, text: cleanText })
+      await submitWish({name: cleanName,text: cleanText,})
+      const updatedWishes = await getWishes()
+      setWishes(updatedWishes)
       setWishName('')
       setWishText('')
     } catch (error) {
@@ -825,7 +948,7 @@ function App() {
                   </div>
                 </motion.div>
               </section>
-
+              {/* RSVP */}
               <section id="rsvp" className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
                 <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="p-0 text-[var(--brand-neutral)]">
                   <div className="mb-3 flex flex-col items-center gap-3 text-center">
@@ -945,8 +1068,8 @@ function App() {
                     </div>
                   </div>
                 </motion.div>
-
-                <motion.div initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="p-0 text-[var(--brand-neutral)]">
+              {/* Guest Wishes */}
+                <motion.div  id="wishes" initial={{ opacity: 0, y: 30, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="p-0 text-[var(--brand-neutral)]">
                   <div className="mb-3 flex flex-col items-center gap-3 text-center">
                     <p className="flex items-center gap-3 font-[Georgia] text-xl uppercase tracking-[0.35em] text-[var(--brand-secondary)] md:text-2xl"><Heart size={18} className="text-white" /><span>Guest wishes</span></p>
                     <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
@@ -956,9 +1079,23 @@ function App() {
                     <p className="mb-4 text-left text-base leading-7 text-[var(--brand-neutral)]">Your duas and words of love mean the world to us.</p>
                     <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
                       {wishes.map((wish) => (
-                        <div key={`${wish.name}-${wish.text}`} className="rounded-[1.25rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-neutral)]/8 p-4 text-[var(--brand-neutral)]">
-                          <p className="text-base leading-7 text-[var(--brand-neutral)]">“{wish.text}”</p>
-                          <p className="mt-3 text-sm uppercase tracking-[0.18em] text-[var(--brand-secondary)]">— {wish.name}</p>
+                        <div
+                          key={`${wish.name}-${wish.text}`}
+                          className="rounded-[1.25rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-neutral)]/8 p-4 text-[var(--brand-neutral)]"
+                        >
+                          <p className="text-base leading-7 text-[var(--brand-neutral)]">
+                            “{wish.text}”
+                          </p>
+
+                          <div className="mt-3 flex items-center gap-2 text-sm uppercase tracking-[0.18em] text-[var(--brand-secondary)]">
+                            <span>— {wish.name}</span>
+
+                            {wish.createdAt && (
+                              <span className="text-[9px] tracking-[0.12em] text-[var(--brand-neutral)]/40 normal-case">
+                                {formatWishDate(wish.createdAt)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -985,7 +1122,7 @@ function App() {
                   </div>
                 </motion.div>
               </section>
-
+              
               <motion.section initial={{ opacity: 0, y: 28, filter: 'blur(12px)', scale: 0.97 }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="relative overflow-hidden rounded-[2rem] border border-[var(--brand-secondary)]/35 bg-[var(--brand-primary-deep)]/95 p-8 text-[var(--brand-neutral)] shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:p-12">
                 <div className="relative text-center">
                   <p className="font-[Georgia] text-[11px] uppercase tracking-[0.5em] text-[var(--brand-secondary)]">With Love</p>
@@ -1037,30 +1174,44 @@ function App() {
           )}
         </AnimatePresence>
         <footer className="bg-[var(--brand-primary-deep)]/80 px-4 pb-8 pt-6 backdrop-blur-sm">
-  <div className="mx-auto flex max-w-xl flex-col items-center">
-    {/* Visitor counter */}
-    <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.28em] text-[var(--brand-neutral)]/45">
-      <span>Guests visited</span>
-      <span className="font-semibold tabular-nums text-[var(--brand-secondary)]">
-        {visitorCount}
-      </span>
-    </div>
-    {/* Built with divider */}
-    <div className="mt-4 flex w-full items-center justify-center gap-3">
-      <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
-      <div className="flex shrink-0 items-center gap-1.5 text-[10px] tracking-[0.18em] text-[var(--brand-neutral)]/60">
-        <span>Built with</span>
-        <Heart
-          size={12}
-          fill="currentColor"
-          className="text-red-500"
-        />
-        <span>@{new Date().getFullYear()}</span>
-      </div>
-      <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
-    </div>
-  </div>
-</footer>
+          <div className="mx-auto flex max-w-xl flex-col items-center">
+
+            {/* Visitor counter */}
+            <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.28em] text-[var(--brand-neutral)]/50">
+              <span>Guests visited</span>
+
+              <span className="min-w-[2rem] text-center font-semibold tabular-nums text-[var(--brand-secondary)]">
+                {visitorLoading ? '...' : visitorCount}
+              </span>
+            </div>
+
+            {/* Built with divider */}
+            <div className="mt-4 flex w-full items-center justify-center gap-3">
+
+              {/* Left fading line */}
+              <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+
+              {/* Built with */}
+              <div className="flex shrink-0 items-center gap-1.5 text-[10px] tracking-[0.18em] text-[var(--brand-neutral)]/60">
+                <span>Built with</span>
+
+                <Heart
+                  size={12}
+                  fill="currentColor"
+                  className="text-red-500"
+                />
+
+                <span>
+                  @{new Date().getFullYear()}
+                </span>
+              </div>
+
+              {/* Right fading line */}
+              <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
+
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   )

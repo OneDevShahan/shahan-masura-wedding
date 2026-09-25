@@ -1,11 +1,14 @@
 import {
-    addDoc,
-    collection,
-    onSnapshot,
-    orderBy,
-    query,
-    Timestamp,
-    type Unsubscribe,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  increment,
+  orderBy,
+  query,
+  setDoc,
+  Timestamp,
 } from 'firebase/firestore'
 
 import { initialWishes, type WishMessage } from '../data/wedding'
@@ -36,22 +39,46 @@ export type WishPayload = {
 
 const ensureDb = () => {
   if (!db) {
-    throw new Error('Firebase is not configured yet. Add your Vite environment variables before using RSVP and wishes.')
+    throw new Error(
+      'Firebase is not configured yet. Add your Vite environment variables before using RSVP and wishes.',
+    )
   }
 
   return db
 }
 
-const safeWishList = (list: WishMessage[] = initialWishes): WishMessage[] =>
-  list.filter((wish) => wish && typeof wish.name === 'string' && typeof wish.text === 'string' && wish.name.trim() && wish.text.trim())
+const safeWishList = (
+  list: WishMessage[] = initialWishes,
+): WishMessage[] =>
+  list.filter(
+    (wish) =>
+      wish &&
+      typeof wish.name === 'string' &&
+      typeof wish.text === 'string' &&
+      wish.name.trim() &&
+      wish.text.trim(),
+  )
 
-export async function submitRSVP(data: RSVPData): Promise<RSVPResult> {
+/* -------------------------------------------------------------------------- */
+/* RSVP                                                                       */
+/* -------------------------------------------------------------------------- */
+
+export async function submitRSVP(
+  data: RSVPData,
+): Promise<RSVPResult> {
   const trimmedName = data.name.trim()
+
   if (!trimmedName) {
-    throw new Error('Please enter your name before sending the RSVP.')
+    throw new Error(
+      'Please enter your name before sending the RSVP.',
+    )
   }
 
-  const normalizedGuests = Math.max(1, Number(data.guests) || 1)
+  const normalizedGuests = Math.max(
+    1,
+    Number(data.guests) || 1,
+  )
+
   const firestore = ensureDb()
 
   await addDoc(collection(firestore, 'rsvps'), {
@@ -74,63 +101,105 @@ export async function submitRSVP(data: RSVPData): Promise<RSVPResult> {
   }
 }
 
-export function subscribeToRSVPs(
-  callback: (count: number) => void,
-): Unsubscribe | undefined {
+/**
+ * Loads the RSVP count once.
+ *
+ * This intentionally does NOT use onSnapshot().
+ * That prevents Firestore from opening a persistent realtime
+ * connection, which avoids the QUIC/HTTP3 connection errors.
+ */
+export async function getRSVPCount(): Promise<number> {
   if (!db) {
-    callback(0)
-    return undefined
+    return 0
   }
 
-  const q = query(collection(db, 'rsvps'))
+  try {
+    const snapshot = await getDocs(
+      collection(db, 'rsvps'),
+    )
 
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      callback(snapshot.size)
-    },
-    () => {
-      callback(0)
-    },
-  )
+    return snapshot.size
+  } catch (error) {
+    console.error(
+      'Could not load RSVP count:',
+      error,
+    )
+
+    return 0
+  }
 }
 
-export function subscribeToWishes(
-  callback: (items: WishMessage[]) => void,
-): Unsubscribe | undefined {
+/* -------------------------------------------------------------------------- */
+/* Wishes                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Loads wishes once.
+ *
+ * No realtime listener is used.
+ */
+export async function getWishes(): Promise<WishMessage[]> {
   if (!db) {
-    callback(safeWishList())
-    return undefined
+    return safeWishList()
   }
 
-  const q = query(collection(db, 'wishes'), orderBy('createdAt', 'desc'))
+  try {
+    const firestore = ensureDb()
 
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      const items = snapshot.docs.map((doc) => {
-        const data = doc.data() as WishPayload
+    const q = query(
+      collection(firestore, 'wishes'),
+      orderBy('createdAt', 'desc'),
+    )
 
-        return {
-          name: String(data.name ?? 'Guest'),
-          text: String(data.text ?? ''),
-        }
-      })
+    const snapshot = await getDocs(q)
 
-      callback(items.filter((wish) => wish.name.trim() && wish.text.trim()).length ? items : safeWishList())
-    },
-    () => {
-      callback(safeWishList())
-    },
-  )
+    const items = snapshot.docs.map((document) => {
+    const data = document.data() as WishPayload
+
+    return {
+      name: String(data.name ?? 'Guest'),
+      text: String(data.text ?? ''),
+      createdAt:
+        data.createdAt instanceof Timestamp
+          ? data.createdAt.toDate()
+          : data.createdAt
+            ? new Date(data.createdAt)
+            : null,
+    }
+  })
+
+    const validItems = items.filter(
+      (wish) =>
+        wish.name.trim() &&
+        wish.text.trim(),
+    )
+
+    return validItems.length
+      ? validItems
+      : safeWishList()
+  } catch (error) {
+    console.error(
+      'Could not load wishes:',
+      error,
+    )
+
+    return safeWishList()
+  }
 }
 
-export async function submitWish(data: { name: string; text: string }): Promise<void> {
+export async function submitWish(
+  data: {
+    name: string
+    text: string
+  },
+): Promise<void> {
   const trimmedName = data.name.trim()
   const trimmedText = data.text.trim()
 
   if (!trimmedName || !trimmedText) {
-    throw new Error('Please enter both your name and a wish before submitting.')
+    throw new Error(
+      'Please enter both your name and a wish before submitting.',
+    )
   }
 
   const firestore = ensureDb()
@@ -140,4 +209,108 @@ export async function submitWish(data: { name: string; text: string }): Promise<
     text: trimmedText,
     createdAt: new Date().toISOString(),
   })
+}
+
+/* -------------------------------------------------------------------------- */
+/* Visitor counter                                                            */
+/* -------------------------------------------------------------------------- */
+
+async function getVisitorIp(): Promise<string> {
+  const response = await fetch(
+    'https://api.ipify.org?format=json',
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      'Could not determine visitor IP.',
+    )
+  }
+
+  const data = (await response.json()) as {
+    ip?: string
+  }
+
+  if (!data.ip) {
+    throw new Error(
+      'Could not determine visitor IP.',
+    )
+  }
+
+  return data.ip
+}
+
+async function hashIp(
+  ip: string,
+): Promise<string> {
+  if (
+    typeof window === 'undefined' ||
+    !window.crypto?.subtle
+  ) {
+    throw new Error(
+      'Browser cryptography is not available.',
+    )
+  }
+
+  const encoder = new TextEncoder()
+  const data = encoder.encode(ip)
+
+  const hashBuffer =
+    await window.crypto.subtle.digest(
+      'SHA-256',
+      data,
+    )
+
+  return Array.from(
+    new Uint8Array(hashBuffer),
+  )
+    .map((byte) =>
+      byte.toString(16).padStart(2, '0'),
+    )
+    .join('')
+}
+
+export async function registerVisitor(): Promise<number> {
+  const firestore = ensureDb()
+
+  const ip = await getVisitorIp()
+  const ipHash = await hashIp(ip)
+
+  const visitorRef = doc(
+    firestore,
+    'visitors',
+    ipHash,
+  )
+
+  const statsRef = doc(
+    firestore,
+    'stats',
+    'visitors',
+  )
+
+  const visitorSnapshot =
+    await getDoc(visitorRef)
+
+  if (!visitorSnapshot.exists()) {
+    await setDoc(visitorRef, {
+      firstSeen: new Date().toISOString(),
+    })
+
+    await setDoc(
+      statsRef,
+      {
+        count: increment(1),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        merge: true,
+      },
+    )
+  }
+
+  const statsSnapshot =
+    await getDoc(statsRef)
+
+  return Number(
+    statsSnapshot.data()?.count ?? 0,
+  )
 }

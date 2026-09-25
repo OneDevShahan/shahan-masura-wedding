@@ -24,6 +24,7 @@ export const navItems = [
   { label: 'Events', href: '#events' },
   { label: 'Venue', href: '#venue' },
   { label: 'RSVP', href: '#rsvp' },
+  { label: 'Wishes', href: '#wishes' },
 ]
 
 export const wedding = {
