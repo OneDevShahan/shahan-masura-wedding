@@ -17,6 +17,7 @@ import {
   X
 } from 'lucide-react'
 import { useEffect, useState, type CSSProperties } from 'react'
+import WeddingInfo from './components/WeddingInfo'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
 import { Ornament } from './components/decorations/Ornament'
 import { initialWishes, navItems, wedding, type WishMessage } from './data/wedding'
@@ -635,27 +636,39 @@ function App() {
         </button>
       </div>
 
-      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 flex items-center justify-center">
-        <button type="button" aria-label={music.isPlaying ? 'Pause music' : 'Play music'} onClick={music.toggle} className="flex h-[3.1rem] w-[3.1rem] items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/90 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-12 sm:w-12">
+      {/* Floating controls */}
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-6 z-40 flex flex-col items-center gap-3">
+        <AnimatePresence>
+          {showTopButton && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 12 }}
+              type="button"
+              aria-label="Scroll to top"
+              onClick={scrollToTop}
+              className="flex h-[3.1rem] w-[3.1rem] shrink-0 items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/85 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-12 sm:w-12"
+            >
+              <ChevronUp size={18} />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        <button
+          type="button"
+          aria-label={music.isPlaying ? 'Pause music' : 'Play music'}
+          onClick={music.toggle}
+          className="flex h-[3.1rem] w-[3.1rem] shrink-0 items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/90 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-12 sm:w-12"
+        >
           {music.isPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </button>
-      </div>
 
-      <AnimatePresence>
-        {showTopButton && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 12 }}
-            type="button"
-            aria-label="Scroll to top"
-            onClick={scrollToTop}
-            className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/85 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 md:h-12 md:w-12"
-          >
-            <ChevronUp size={18} />
-          </motion.button>
-        )}
-      </AnimatePresence>
+        <WeddingInfo
+          rsvpCount={rsvpCount}
+          wishesCount={wishes.length}
+          visitorCount={visitorCount}
+        />
+      </div>
 
       <AnimatePresence>
         {menuOpen && (
@@ -960,16 +973,10 @@ function App() {
                     <p className="text-base leading-7 text-[var(--brand-neutral)]">Your presence would make our celebration even more special. Kindly let us know if you&apos;ll be joining us.</p>
 
                     <div className="mt-6 space-y-5">
-                      <div className="rounded-[1rem] border border-[var(--brand-secondary)]/15 bg-[var(--brand-primary)]/5 p-3">
-                        <p className="text-xs uppercase tracking-[0.25em] text-[var(--brand-secondary)]">Current RSVP count</p>
-                        <p className="mt-2 text-2xl font-[Georgia] text-[var(--brand-neutral)]">{rsvpCount}</p>
-                      </div>
-
                       <div>
                         <label htmlFor="guestName" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Your Name</label>
                         <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
                       </div>
-
                       <div>
                         <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Will you be attending?</p>
                         <div className="grid gap-3 sm:grid-cols-2">
@@ -1081,7 +1088,7 @@ function App() {
                       {wishes.map((wish) => (
                         <div
                           key={`${wish.name}-${wish.text}`}
-                          className="rounded-[1.25rem] border border-[var(--brand-secondary)]/25 bg-[var(--brand-neutral)]/8 p-4 text-[var(--brand-neutral)]"
+                          className="rounded-[1rem] border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/5 p-4"
                         >
                           <p className="text-base leading-7 text-[var(--brand-neutral)]">
                             “{wish.text}”
