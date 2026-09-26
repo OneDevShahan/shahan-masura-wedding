@@ -91,12 +91,24 @@ export default function WeddingInfo({
                 <InfoRow label="Wishes" value={wishesCount} />
                 <InfoRow label="Unique visitors" value={visitorCount} />
               </div>
+              <div className="mt-5 pt-3">
+                <div
+                    className="
+                    mb-3
+                    h-px
+                    w-full
+                    bg-gradient-to-r
+                    from-transparent
+                    via-[var(--brand-secondary)]
+                    to-transparent
+                    opacity-70
+                    "
+                />
 
-              <div className="mt-4 border-t border-[var(--brand-secondary)]/10 pt-3">
                 <p className="text-center text-[11px] leading-relaxed text-[var(--brand-neutral)]/60">
-                  Thank you for being a part of our celebration.
+                    Thank you for being a part of our celebration.
                 </p>
-              </div>
+                </div>
             </motion.div>
           </>
         )}
@@ -115,7 +127,17 @@ function InfoRow({
   value,
 }: InfoRowProps) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-[var(--brand-secondary)]/15 bg-white/[0.03] px-4 py-3">
+    <div className="flex
+                    items-center
+                    justify-between
+                    rounded-xl
+                    border
+                    border-[var(--brand-secondary)]
+                    bg-[var(--brand-secondary)]/[0.025]
+                    px-4
+                    py-3
+                    shadow-[inset_0_0_18px_rgba(212,175,55,0.025)]
+                    ">
       <span className="text-sm text-[var(--brand-neutral)]/65">
         {label}
       </span>
