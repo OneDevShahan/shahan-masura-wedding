@@ -12,6 +12,7 @@ import {
   House,
   LoaderCircle,
   MapPin,
+  Palette,
   Menu,
   Share2,
   Sparkles,
@@ -570,13 +571,13 @@ function App() {
             <button
               type="button"
               aria-label="Palette options"
-              className="flex items-center gap-2 rounded-full px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.22em] transition hover:opacity-90"
+              className="flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.22em] transition hover:opacity-90"
               style={{
-                background: `linear-gradient(135deg, ${activePalette.colors.primary} 0%, ${activePalette.colors.primarySoft} 100%)`,
+                // background: `linear-gradient(135deg, ${activePalette.colors.primary} 0%, ${activePalette.colors.primarySoft} 100%)`,
                 color: activePalette.colors.secondary,
               }}
-            >
-              <span>Palette</span>
+            ><Palette size={16} strokeWidth={2} />
+              {/* <span>Palette</span> */}
               <ChevronDown size={12} />
             </button>
 
@@ -589,7 +590,7 @@ function App() {
                   transition={{ duration: 0.18, ease: 'easeOut' }}
                   onMouseEnter={() => setPaletteMenuOpen(true)}
                   onMouseLeave={() => setPaletteMenuOpen(false)}
-                  className="absolute right-0 top-[calc(100%+0.75rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 p-2 shadow-[0_14px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl"
+                  className="absolute right-0 top-[calc(100%+0.75rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] p-2 shadow-[0_14px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl"
                   style={{
                     background: `linear-gradient(135deg, ${activePalette.colors.primaryDeep} 0%, ${activePalette.colors.primary} 100%)`,
                   }}
@@ -623,34 +624,116 @@ function App() {
             onMouseLeave={() => setPaletteMenuOpen(false)}
             onFocus={() => setPaletteMenuOpen(true)}
             onBlur={() => setPaletteMenuOpen(false)}
-            className="relative"
+            className="group relative"
           >
             <button
               type="button"
-              aria-label="Palette options"
-              className="flex items-center gap-1 rounded-full px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.2em] transition hover:opacity-90"
-              style={{
-                background: `linear-gradient(135deg, ${activePalette.colors.primary} 0%, ${activePalette.colors.primarySoft} 100%)`,
-                color: activePalette.colors.secondary,
-              }}
+              aria-label="Palette"
+              title="Palette"
+              className="
+                relative
+                flex
+                h-9
+                w-9
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-[var(--brand-primary)]
+                text-[var(--brand-secondary)]
+                transition-all
+                duration-300
+                hover:scale-105
+                hover:bg-[var(--brand-secondary)]/10
+                focus:outline-none
+                focus:ring-1
+                focus:ring-[var(--brand-secondary)]/50
+              "
             >
-              <span>Palette</span>
-              <ChevronDown size={12} />
+              <Palette
+                size={17}
+                strokeWidth={2}
+              />
+<ChevronDown size={12}/>
+              {/* Tooltip INSIDE the header */}
+              <span
+                className="
+                  pointer-events-none
+                  absolute
+                  right-1/2
+                  top-1/2
+                  z-50
+                  mr-2
+                  -translate-y-1/2
+                  translate-x-[-100%]
+                  whitespace-nowrap
+                  rounded-full
+                  border
+                  border-[var(--brand-secondary)]
+                  bg-[var(--brand-primary-deep)]
+                  px-2.5
+                  py-1
+                  text-[8px]
+                  font-semibold
+                  uppercase
+                  tracking-[0.2em]
+                  text-[var(--brand-secondary)]
+                  opacity-0
+                  shadow-lg
+                  transition-all
+                  duration-200
+                  group-hover:translate-x-[-105%]
+                  group-hover:opacity-100
+                "
+              >
+                Palette
+              </span>
             </button>
 
             <AnimatePresence>
               {paletteMenuOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.96 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  onMouseEnter={() => setPaletteMenuOpen(true)}
-                  onMouseLeave={() => setPaletteMenuOpen(false)}
-                  className="absolute right-0 top-[calc(100%+0.5rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)]/30 p-2 shadow-[0_12px_24px_rgba(0,0,0,0.15)] backdrop-blur-xl"
-                  style={{
-                    background: `linear-gradient(135deg, ${activePalette.colors.primaryDeep} 0%, ${activePalette.colors.primary} 100%)`,
+                  initial={{
+                    opacity: 0,
+                    y: 10,
+                    scale: 0.96,
                   }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: 10,
+                    scale: 0.96,
+                  }}
+                  transition={{
+                    duration: 0.18,
+                    ease: 'easeOut',
+                  }}
+                  onMouseEnter={() =>
+                    setPaletteMenuOpen(true)
+                  }
+                  onMouseLeave={() =>
+                    setPaletteMenuOpen(false)
+                  }
+                  className="
+                    absolute
+                    right-0
+                    top-[calc(100%+0.5rem)]
+                    z-50
+                    flex
+                    items-center
+                    gap-2
+                    rounded-full
+                    border
+                    border-[var(--brand-secondary)]
+                    bg-[var(--brand-primary-deep)]/95
+                    p-2
+                    shadow-[0_12px_24px_rgba(0,0,0,0.2)]
+                    backdrop-blur-xl
+                  "
                 >
                   {paletteOptions.map((option) => (
                     <button
@@ -662,10 +745,26 @@ function App() {
                         setPaletteMenuOpen(false)
                       }}
                       title={option.name}
-                      className="h-4 w-4 rounded-full border border-white/50 transition hover:scale-110"
+                      className="
+                        h-5
+                        w-5
+                        shrink-0
+                        rounded-full
+                        border
+                        border-white/50
+                        transition
+                        hover:scale-110
+                      "
                       style={{
-                        background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)`,
-                        boxShadow: activePalette.id === option.id ? `0 0 0 2px ${option.colors.secondarySoft}` : 'none',
+                        background: `linear-gradient(
+                          135deg,
+                          ${option.colors.secondary} 0%,
+                          ${option.colors.primary} 100%
+                        )`,
+                        boxShadow:
+                          activePalette.id === option.id
+                            ? `0 0 0 2px ${option.colors.secondarySoft}`
+                            : 'none',
                       }}
                     />
                   ))}

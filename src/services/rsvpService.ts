@@ -88,13 +88,16 @@ export async function submitRSVP(
 
   const firestore = ensureDb()
 
-  await addDoc(collection(firestore, 'rsvps'), {
-    name: trimmedName,
-    attending: data.attending,
-    guests: normalizedGuests,
-    message: data.message.trim(),
-    createdAt: new Date().toISOString(),
-  })
+  await addDoc(
+    collection(firestore, 'rsvps'),
+    {
+      name: trimmedName,
+      attending: data.attending,
+      guests: normalizedGuests,
+      message: data.message.trim(),
+      createdAt: new Date().toISOString(),
+    },
+  )
 
   return {
     success: true,
@@ -112,6 +115,8 @@ export async function submitRSVP(
  * Loads the RSVP count once.
  *
  * This intentionally does NOT use onSnapshot().
+ * That prevents Firestore from opening a persistent realtime
+ * connection.
  */
 export async function getRSVPCount(): Promise<number> {
   if (!db) {
@@ -140,6 +145,8 @@ export async function getRSVPCount(): Promise<number> {
 
 /**
  * Loads wishes once.
+ *
+ * No realtime listener is used.
  */
 export async function getWishes(): Promise<WishMessage[]> {
   if (!db) {
@@ -157,11 +164,16 @@ export async function getWishes(): Promise<WishMessage[]> {
     const snapshot = await getDocs(q)
 
     const items = snapshot.docs.map((document) => {
-      const data = document.data() as WishPayload
+      const data =
+        document.data() as WishPayload
 
       return {
-        name: String(data.name ?? 'Guest'),
-        text: String(data.text ?? ''),
+        name: String(
+          data.name ?? 'Guest',
+        ),
+        text: String(
+          data.text ?? '',
+        ),
         createdAt:
           data.createdAt instanceof Timestamp
             ? data.createdAt.toDate()
@@ -199,7 +211,10 @@ export async function submitWish(
   const trimmedName = data.name.trim()
   const trimmedText = data.text.trim()
 
-  if (!trimmedName || !trimmedText) {
+  if (
+    !trimmedName ||
+    !trimmedText
+  ) {
     throw new Error(
       'Please enter both your name and a wish before submitting.',
     )
@@ -207,11 +222,15 @@ export async function submitWish(
 
   const firestore = ensureDb()
 
-  await addDoc(collection(firestore, 'wishes'), {
-    name: trimmedName,
-    text: trimmedText,
-    createdAt: new Date().toISOString(),
-  })
+  await addDoc(
+    collection(firestore, 'wishes'),
+    {
+      name: trimmedName,
+      text: trimmedText,
+      createdAt:
+        new Date().toISOString(),
+    },
+  )
 }
 
 /* -------------------------------------------------------------------------- */
@@ -234,9 +253,10 @@ async function getVisitorIp(): Promise<string> {
     )
   }
 
-  const data = (await response.json()) as {
-    ip?: string
-  }
+  const data =
+    (await response.json()) as {
+      ip?: string
+    }
 
   if (!data.ip) {
     throw new Error(
@@ -266,20 +286,30 @@ async function getVisitorLocation(
     )
   }
 
-  const data = (await response.json()) as {
-    city?: string
-    region?: string
-    country_name?: string
-    country_code?: string
-  }
+  const data =
+    (await response.json()) as {
+      city?: string
+      region?: string
+      country_name?: string
+      country_code?: string
+    }
 
   return {
-    city: data.city?.trim() || 'Unknown',
-    region: data.region?.trim() || 'Unknown',
+    city:
+      data.city?.trim() ||
+      'Unknown',
+
+    region:
+      data.region?.trim() ||
+      'Unknown',
+
     country:
-      data.country_name?.trim() || 'Unknown',
+      data.country_name?.trim() ||
+      'Unknown',
+
     countryCode:
-      data.country_code?.trim() || 'Unknown',
+      data.country_code?.trim() ||
+      'Unknown',
   }
 }
 
@@ -300,8 +330,11 @@ async function hashIp(
     )
   }
 
-  const encoder = new TextEncoder()
-  const data = encoder.encode(ip)
+  const encoder =
+    new TextEncoder()
+
+  const data =
+    encoder.encode(ip)
 
   const hashBuffer =
     await window.crypto.subtle.digest(
@@ -313,7 +346,9 @@ async function hashIp(
     new Uint8Array(hashBuffer),
   )
     .map((byte) =>
-      byte.toString(16).padStart(2, '0'),
+      byte
+        .toString(16)
+        .padStart(2, '0'),
     )
     .join('')
 }
@@ -334,30 +369,39 @@ async function hashIp(
  * Existing visitors are NOT updated.
  */
 export async function registerVisitor(): Promise<number> {
-  const firestore = ensureDb()
+  const firestore =
+    ensureDb()
 
-  const ip = await getVisitorIp()
-  const ipHash = await hashIp(ip)
+  const ip =
+    await getVisitorIp()
 
-  const visitorRef = doc(
-    firestore,
-    'visitors',
-    ipHash,
-  )
+  const ipHash =
+    await hashIp(ip)
 
-  const statsRef = doc(
-    firestore,
-    'stats',
-    'visitors',
-  )
+  const visitorRef =
+    doc(
+      firestore,
+      'visitors',
+      ipHash,
+    )
+
+  const statsRef =
+    doc(
+      firestore,
+      'stats',
+      'visitors',
+    )
 
   const visitorSnapshot =
     await getDoc(visitorRef)
 
-  let location: VisitorLocation | null = null
+  let location:
+    | VisitorLocation
+    | null = null
 
   try {
-    location = await getVisitorLocation(ip)
+    location =
+      await getVisitorLocation(ip)
   } catch (error) {
     console.warn(
       'Could not determine visitor location:',
@@ -368,26 +412,33 @@ export async function registerVisitor(): Promise<number> {
   /*
    * Only CREATE new visitor documents.
    *
-   * We intentionally do not update existing visitor
-   * documents because your Firestore rules currently
-   * allow create but not update.
+   * Existing visitors are not updated.
    */
-  if (!visitorSnapshot.exists()) {
-    await setDoc(visitorRef, {
-      firstSeen: new Date().toISOString(),
+  if (
+    !visitorSnapshot.exists()
+  ) {
+    await setDoc(
+      visitorRef,
+      {
+        firstSeen:
+          new Date().toISOString(),
 
-      ...(location
-        ? {
-            location,
-          }
-        : {}),
-    })
+        ...(location
+          ? {
+              location,
+            }
+          : {}),
+      },
+    )
 
     await setDoc(
       statsRef,
       {
-        count: increment(1),
-        updatedAt: new Date().toISOString(),
+        count:
+          increment(1),
+
+        updatedAt:
+          new Date().toISOString(),
       },
       {
         merge: true,
@@ -399,7 +450,9 @@ export async function registerVisitor(): Promise<number> {
     await getDoc(statsRef)
 
   return Number(
-    statsSnapshot.data()?.count ?? 0,
+    statsSnapshot
+      .data()
+      ?.count ?? 0,
   )
 }
 
@@ -416,68 +469,98 @@ export async function getVisitorLocations(): Promise<
   }
 
   try {
-    const firestore = ensureDb()
+    const firestore =
+      ensureDb()
 
-    const snapshot = await getDocs(
-      collection(firestore, 'visitors'),
+    const snapshot =
+      await getDocs(
+        collection(
+          firestore,
+          'visitors',
+        ),
+      )
+
+    const locations:
+      VisitorLocation[] = []
+
+    snapshot.forEach(
+      (document) => {
+        const data =
+          document.data()
+
+        const location =
+          data.location as
+            | Partial<VisitorLocation>
+            | undefined
+
+        if (!location) {
+          return
+        }
+
+        const city =
+          String(
+            location.city ?? '',
+          ).trim()
+
+        const region =
+          String(
+            location.region ?? '',
+          ).trim()
+
+        const country =
+          String(
+            location.country ?? '',
+          ).trim()
+
+        const countryCode =
+          String(
+            location.countryCode ??
+              '',
+          ).trim()
+
+        if (
+          !city &&
+          !region &&
+          !country
+        ) {
+          return
+        }
+
+        locations.push({
+          city:
+            city || 'Unknown',
+
+          region:
+            region || 'Unknown',
+
+          country:
+            country || 'Unknown',
+
+          countryCode:
+            countryCode ||
+            'Unknown',
+        })
+      },
     )
-
-    const locations: VisitorLocation[] = []
-
-    snapshot.forEach((document) => {
-      const data = document.data()
-
-      const location =
-        data.location as
-          | Partial<VisitorLocation>
-          | undefined
-
-      if (!location) {
-        return
-      }
-
-      const city =
-        String(location.city ?? '').trim()
-
-      const region =
-        String(location.region ?? '').trim()
-
-      const country =
-        String(location.country ?? '').trim()
-
-      const countryCode =
-        String(
-          location.countryCode ?? '',
-        ).trim()
-
-      if (!city && !region && !country) {
-        return
-      }
-
-      locations.push({
-        city: city || 'Unknown',
-        region: region || 'Unknown',
-        country: country || 'Unknown',
-        countryCode:
-          countryCode || 'Unknown',
-      })
-    })
 
     /*
      * Remove duplicate locations.
      */
-    const uniqueLocations = Array.from(
-      new Map(
-        locations.map((location) => [
-          [
-            location.city,
-            location.region,
-            location.country,
-          ].join('|'),
-          location,
-        ]),
-      ).values(),
-    )
+    const uniqueLocations =
+      Array.from(
+        new Map(
+          locations.map(
+            (location) => [
+              [
+                location.city,
+                location.region,
+                location.country,
+              ].join('|'),
+              location,
+            ],
+          ),
+        ).values(),
+      )
 
     return uniqueLocations
   } catch (error) {
