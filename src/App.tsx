@@ -2,11 +2,14 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowRight,
   CalendarClock,
+  CalendarDays,
   ChevronDown,
   ChevronUp,
   Clock3,
+  ClipboardCheck,
   Copy,
   Heart,
+  House,
   LoaderCircle,
   MapPin,
   Menu,
@@ -14,7 +17,7 @@ import {
   Sparkles,
   Volume2,
   VolumeX,
-  X
+  X,
 } from 'lucide-react'
 import { useEffect, useState, type CSSProperties } from 'react'
 import WeddingInfo from './components/WeddingInfo'
@@ -53,6 +56,14 @@ type PaletteOption = {
 type DisplayWish = WishMessage & {
   createdAt?: Date | null
 }
+
+const navIcons = {
+  Home: House,
+  Events: CalendarDays,
+  Venue: MapPin,
+  RSVP: ClipboardCheck,
+  Wishes: Heart,
+} as const
 
 const paletteOptions: PaletteOption[] = [
   {
@@ -228,7 +239,36 @@ function App() {
   return () => {
     cancelled = true
   }
-}, [])
+  }, [])
+  
+  useEffect(() => {
+    let cancelled = false
+
+    const loadVisitorLocations = async () => {
+      try {
+        const locations = await getVisitorLocations()
+
+        if (!cancelled) {
+          setVisitorLocations(locations)
+        }
+      } catch (error) {
+        console.error(
+          'Could not load visitor locations:',
+          error,
+        )
+
+        if (!cancelled) {
+          setVisitorLocations([])
+        }
+      }
+    }
+
+    void loadVisitorLocations()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setShowTopButton(window.scrollY > 260)
@@ -299,38 +339,6 @@ function App() {
     }, 180)
   }
 
-  // const handleSubmitRSVP = async () => {
-  //   const trimmedName = guestName.trim()
-  //   if (!trimmedName) {
-  //     setRsvpState({ success: false, name: '', message: 'Please enter your name before sending the RSVP.' })
-  //     return
-  //   }
-
-  //   setIsSubmittingRsvp(true)
-
-  //   try {
-  //     const result = await submitRSVP({
-  //       name: trimmedName,
-  //       attending,
-  //       guests,
-  //       message,
-  //     })
-
-  //     setRsvpState({
-  //       success: true,
-  //       name: result.displayName,
-  //       message:
-  //         result.status === 'yes'
-  //           ? 'Thank you, ' + result.displayName + '! We look forward to celebrating with you.'
-  //           : 'Thank you for letting us know. Your duas and good wishes mean a lot to us.',
-  //     })
-  //   } catch (error) {
-  //     const messageText = error instanceof Error ? error.message : 'Something went wrong. Please try again.'
-  //     setRsvpState({ success: false, name: '', message: messageText })
-  //   } finally {
-  //     setIsSubmittingRsvp(false)
-  //   }
-  // }
   const handleSubmitRSVP = async () => {
     const trimmedName = guestName.trim()
     if (!trimmedName) {
@@ -500,11 +508,55 @@ function App() {
           <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-secondary)] transition-transform duration-300 ease-out hover:translate-x-1 hover:scale-[1.1] sm:text-[10px] md:text-[11px]">Invitation</span>
         </a>
         <div className="flex flex-1 items-center justify-evenly gap-1 sm:gap-2 md:gap-4">
-          {navItems.map((item) => (
-            <a key={item.label} href={item.href} className="text-[8px] font-semibold tracking-[0.15em] text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-[1.1] hover:text-[var(--brand-secondary)] sm:text-[9px] md:text-[11px]">
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const Icon = navIcons[item.label as keyof typeof navIcons]
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                aria-label={item.label}
+                className="group relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-110 hover:bg-[var(--brand-secondary)]/10"
+              >
+                <Icon
+                  size={18}
+                  strokeWidth={1.8}
+                  className="transition-transform duration-300 group-hover:scale-110"
+                />
+
+                {/* Tooltip */}
+                <span
+                  className="
+                    pointer-events-none
+                    absolute
+                    left-1/2
+                    bottom-[calc(100%-0.35rem)]
+                    z-[100]
+                    -translate-x-1/2
+                    translate-y-1
+                    whitespace-nowrap
+                    rounded-md
+                    border-[var(--brand-secondary)]
+                    bg-[var(--brand-primary-deep)]
+                    px-2.5
+                    py-1
+                    text-[8px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.14em]
+                    text-[var(--brand-secondary)]
+                    opacity-0
+                    shadow-lg
+                    transition-all
+                    duration-200
+                    group-hover:translate-y-0
+                    group-hover:opacity-100
+                  "
+                >
+                  {item.label}
+                </span>
+              </a>
+            )
+          })}
         </div>
 
         <div className="relative hidden items-center md:flex">
