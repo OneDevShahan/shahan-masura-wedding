@@ -25,10 +25,12 @@ import { useCountdown } from './hooks/useCountdown'
 import { useMusic } from './hooks/useMusic'
 import {
   getRSVPCount,
+  getVisitorLocations,
   getWishes,
   registerVisitor,
   submitRSVP,
   submitWish,
+  type VisitorLocation,
 } from './services/rsvpService'
 
 import { getGoogleCalendarLink, getIcsContent } from './utils/calendar'
@@ -189,7 +191,7 @@ function App() {
   const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false)
   const [isSubmittingWish, setIsSubmittingWish] = useState(false)
   const [visitorCount, setVisitorCount] = useState<number>(0)
-  const [visitorLoading, setVisitorLoading] = useState(true)
+  const [visitorLocations, setVisitorLocations] = useState<VisitorLocation[]>([])
   const [showTopButton, setShowTopButton] = useState(false)
   const [showWelcomeHint, setShowWelcomeHint] = useState(false)
   const [invitationState, setInvitationState] = useState<'idle' | 'welcome'>('idle')
@@ -200,41 +202,33 @@ function App() {
   const music = useMusic(wedding.music.src, wedding.music.enabled)
 
   useEffect(() => {
-    let cancelled = false
+  let cancelled = false
 
-    const loadVisitorCount = async () => {
-      try {
-        setVisitorLoading(true)
+  const loadVisitorCount = async () => {
+    try {
+      const count = await registerVisitor()
 
-        const count = await registerVisitor()
+      if (!cancelled) {
+        setVisitorCount(count)
+      }
+    } catch (error) {
+      console.error(
+        'Could not register visitor:',
+        error,
+      )
 
-        if (!cancelled) {
-          setVisitorCount(count)
-        }
-      } catch (error) {
-        console.error(
-          'Could not register visitor:',
-          error,
-        )
-
-        if (!cancelled) {
-          // Keep the UI visible even if visitor
-          // registration fails.
-          setVisitorCount(0)
-        }
-      } finally {
-        if (!cancelled) {
-          setVisitorLoading(false)
-        }
+      if (!cancelled) {
+        setVisitorCount(0)
       }
     }
+  }
 
-    void loadVisitorCount()
+  void loadVisitorCount()
 
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  return () => {
+    cancelled = true
+  }
+}, [])
 
   useEffect(() => {
     const onScroll = () => setShowTopButton(window.scrollY > 260)
@@ -666,7 +660,8 @@ function App() {
         <WeddingInfo
           rsvpCount={rsvpCount}
           wishesCount={wishes.length}
-          visitorCount={visitorCount}
+          visitorCount={visitorCount ?? 0}
+          visitorLocations={visitorLocations}
         />
       </div>
 
@@ -1187,8 +1182,15 @@ function App() {
             <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.28em] text-[var(--brand-neutral)]/50">
               <span>Guests visited</span>
 
-              <span className="min-w-[2rem] text-center font-semibold tabular-nums text-[var(--brand-secondary)]">
-                {visitorLoading ? '...' : visitorCount}
+              <span className="flex min-w-[2rem] items-center justify-center font-semibold tabular-nums text-[var(--brand-secondary)]">
+                {visitorCount === null ? (
+                  <span
+                    className="inline-block h-3 w-3 animate-spin rounded-full border border-[var(--brand-secondary)]/30 border-t-[var(--brand-secondary)]"
+                    aria-label="Loading visitor count"
+                  />
+                ) : (
+                  visitorCount
+                )}
               </span>
             </div>
 
