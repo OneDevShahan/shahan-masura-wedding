@@ -639,7 +639,7 @@ function App() {
                 justify-center
                 rounded-full
                 border
-                border-[var(--brand-primary)]
+                border-[var(--brand-secondary)]
                 text-[var(--brand-secondary)]
                 transition-all
                 duration-300
