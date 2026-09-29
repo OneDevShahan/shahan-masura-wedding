@@ -2,29 +2,33 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowRight,
   CalendarClock,
-  CalendarDays,
   ChevronDown,
   ChevronUp,
   Clock3,
-  ClipboardCheck,
   Copy,
   Heart,
-  House,
   LoaderCircle,
   MapPin,
-  Palette,
   Menu,
   Share2,
-  Sparkles,
   Volume2,
   VolumeX,
   X,
 } from 'lucide-react'
 import { useEffect, useState, type CSSProperties } from 'react'
+import Header, {
+  paletteOptions,
+  type PaletteOption,
+} from './components/Header'
 import WeddingInfo from './components/WeddingInfo'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
 import { Ornament } from './components/decorations/Ornament'
-import { initialWishes, navItems, wedding, type WishMessage } from './data/wedding'
+import {
+  initialWishes,
+  navItems,
+  wedding,
+} from './data/wedding'
+import type { DisplayWish } from './types/wedding'
 import { useCountdown } from './hooks/useCountdown'
 import { useMusic } from './hooks/useMusic'
 import {
@@ -36,156 +40,18 @@ import {
   submitWish,
   type VisitorLocation,
 } from './services/rsvpService'
+import {
+  getGoogleCalendarLink,
+  getIcsContent,
+} from './utils/calendar'
+import {
+  copyToClipboard,
+  getWhatsAppShareUrl,
+} from './utils/share'
 
-import { getGoogleCalendarLink, getIcsContent } from './utils/calendar'
-import { copyToClipboard, getWhatsAppShareUrl } from './utils/share'
-
-type PaletteOption = {
-  id: string
-  name: string
-  colors: {
-    primary: string
-    primaryDeep: string
-    primarySoft: string
-    secondary: string
-    secondarySoft: string
-    neutral: string
-    neutralSoft: string
-  }
-}
-
-type DisplayWish = WishMessage & {
-  createdAt?: Date | null
-}
-
-const navIcons = {
-  Home: House,
-  Events: CalendarDays,
-  Venue: MapPin,
-  RSVP: ClipboardCheck,
-  Wishes: Heart,
-} as const
-
-const paletteOptions: PaletteOption[] = [
-  {
-    id: 'navy-gold',
-    name: 'Navy & Gold',
-    colors: {
-      primary: '#1a2b44',
-      primaryDeep: '#101b2d',
-      primarySoft: '#324d72',
-      secondary: '#d7b06c',
-      secondarySoft: '#f5e9c8',
-      neutral: '#f7f3ee',
-      neutralSoft: '#e8eadf',
-    },
-  },
-  {
-    id: 'teal-coral',
-    name: 'Teal & Coral',
-    colors: {
-      primary: '#0e4e4d',
-      primaryDeep: '#0b2d2d',
-      primarySoft: '#2a7b78',
-      secondary: '#f48d6d',
-      secondarySoft: '#f9d7c5',
-      neutral: '#f8f5f1',
-      neutralSoft: '#f1e5df',
-    },
-  },
-  {
-    id: 'plum-ivory',
-    name: 'Plum & Ivory',
-    colors: {
-      primary: '#4d3245',
-      primaryDeep: '#261b25',
-      primarySoft: '#7c5c69',
-      secondary: '#d4a867',
-      secondarySoft: '#f2dfb4',
-      neutral: '#f8f4f1',
-      neutralSoft: '#efe3db',
-    },
-  },
-  {
-    id: 'charcoal-rose',
-    name: 'Charcoal & Rose',
-    colors: {
-      primary: '#2a2d32',
-      primaryDeep: '#17191c',
-      primarySoft: '#5d6570',
-      secondary: '#c8928b',
-      secondarySoft: '#f0d6d2',
-      neutral: '#f7f3ef',
-      neutralSoft: '#ece4df',
-    },
-  },
-  {
-    id: 'sage-cream',
-    name: 'Sage & Cream',
-    colors: {
-      primary: '#4b5f51',
-      primaryDeep: '#24372e',
-      primarySoft: '#7d9285',
-      secondary: '#d0a56d',
-      secondarySoft: '#f0ddbf',
-      neutral: '#f8f5ee',
-      neutralSoft: '#e8dfd1',
-    },
-  },
-]
-
-function formatWishDate(
-  createdAt?: string | Date | null,
-) {
-  if (!createdAt) return ''
-
-  const date =
-    createdAt instanceof Date
-      ? createdAt
-      : new Date(createdAt)
-
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-
-  const parts = new Intl.DateTimeFormat('en-IN', {
-  timeZone: 'Asia/Kolkata',
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-}).formatToParts(date)
-
-const day = Number(
-  parts.find((part) => part.type === 'day')?.value
-)
-
-const month =
-  parts.find((part) => part.type === 'month')?.value ?? ''
-
-const year =
-  parts.find((part) => part.type === 'year')?.value ?? ''
-
-  const time = new Intl.DateTimeFormat(
-    'en-IN',
-    {
-      timeZone: 'Asia/Kolkata',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    },
-  ).format(date)
-
-  const suffix =
-    day % 10 === 1 && day !== 11
-      ? 'st'
-      : day % 10 === 2 && day !== 12
-        ? 'nd'
-        : day % 10 === 3 && day !== 13
-          ? 'rd'
-          : 'th'
-
-  return `${time} · ${day}${suffix} ${month} ${year}`
-}
+import {
+  formatWishDate
+} from './utils/DateUtils'
 
 function App() {
   const [isOpened, setIsOpened] = useState(false)
@@ -209,46 +75,38 @@ function App() {
   const [invitationState, setInvitationState] = useState<'idle' | 'welcome'>('idle')
   const [activePalette, setActivePalette] = useState<PaletteOption>(paletteOptions[0])
   const [paletteMenuOpen, setPaletteMenuOpen] = useState(false)
-
   const countdown = useCountdown(wedding.date.iso)
   const music = useMusic(wedding.music.src, wedding.music.enabled)
 
   useEffect(() => {
-  let cancelled = false
-
-  const loadVisitorCount = async () => {
-    try {
-      const count = await registerVisitor()
-
-      if (!cancelled) {
-        setVisitorCount(count)
-      }
-    } catch (error) {
-      console.error(
-        'Could not register visitor:',
-        error,
-      )
-
-      if (!cancelled) {
-        setVisitorCount(0)
+    let cancelled = false
+    const loadVisitorCount = async () => {
+      try {
+        const count = await registerVisitor()
+        if (!cancelled) {
+          setVisitorCount(count)
+        }
+      } catch (error) {
+        console.error(
+          'Could not register visitor:',
+          error,
+        )
+        if (!cancelled) {
+          setVisitorCount(0)
+        }
       }
     }
-  }
-
-  void loadVisitorCount()
-
-  return () => {
-    cancelled = true
-  }
+    void loadVisitorCount()
+    return () => {
+      cancelled = true
+    }
   }, [])
   
   useEffect(() => {
     let cancelled = false
-
     const loadVisitorLocations = async () => {
       try {
         const locations = await getVisitorLocations()
-
         if (!cancelled) {
           setVisitorLocations(locations)
         }
@@ -257,15 +115,12 @@ function App() {
           'Could not load visitor locations:',
           error,
         )
-
         if (!cancelled) {
           setVisitorLocations([])
         }
       }
     }
-
     void loadVisitorLocations()
-
     return () => {
       cancelled = true
     }
@@ -280,17 +135,13 @@ function App() {
 
   useEffect(() => {
     let cancelled = false
-
     const loadRSVPCount = async () => {
       const count = await getRSVPCount()
-
       if (!cancelled) {
         setRsvpCount(count)
       }
     }
-
     void loadRSVPCount()
-
     return () => {
       cancelled = true
     }
@@ -298,17 +149,13 @@ function App() {
 
   useEffect(() => {
     let cancelled = false
-
     const loadWishes = async () => {
       const items = await getWishes()
-
       if (!cancelled) {
         setWishes(items)
       }
     }
-
     void loadWishes()
-
     return () => {
       cancelled = true
     }
@@ -322,19 +169,15 @@ function App() {
     setIsOpened(true)
     setInvitationState('welcome')
     setShowWelcomeHint(true)
-
     if (!music.isPlaying) {
       void music.toggle()
     }
-
     window.setTimeout(() => {
       setShowWelcomeHint(false)
     }, 1800)
-
     window.setTimeout(() => {
       const storySection = document.getElementById('story')
       if (!storySection) return
-
       const top = storySection.getBoundingClientRect().top + window.scrollY - 90
       window.scrollTo({ top, behavior: 'smooth' })
     }, 180)
@@ -359,7 +202,6 @@ function App() {
       return
     }
     setIsSubmittingRsvp(true)
-
     try {
       const result = await submitRSVP({
         name: trimmedName,
@@ -377,7 +219,6 @@ function App() {
             ? 'Thank you, ' + result.displayName + '! We look forward to celebrating with you.'
             : 'Thank you for letting us know. Your duas and good wishes mean a lot to us.',
       })
-
       // Clear RSVP form after successful submission
       setGuestName('')
       setAttending('')
@@ -388,7 +229,6 @@ function App() {
         error instanceof Error
           ? error.message
           : 'Something went wrong. Please try again.'
-
       setRsvpState({
         success: false,
         name: '',
@@ -397,15 +237,13 @@ function App() {
     } finally {
       setIsSubmittingRsvp(false)
     }
-}
+  }
 
   const addWish = async () => {
     const cleanName = wishName.trim()
     const cleanText = wishText.trim()
     if (!cleanName || !cleanText) return
-
     setIsSubmittingWish(true)
-
     try {
       await submitWish({name: cleanName,text: cleanText,})
       const updatedWishes = await getWishes()
@@ -423,25 +261,21 @@ function App() {
   const handleShare = async (type: 'whatsapp' | 'copy' | 'native') => {
     const messageText = `${wedding.share.message} ${wedding.bride.name} & ${wedding.groom.name}`
     const url = window.location.href
-
     if (type === 'whatsapp') {
       window.open(getWhatsAppShareUrl(`${messageText} ${url}`), '_blank', 'noopener,noreferrer')
       setShareStatus('WhatsApp share opened')
       return
     }
-
     if (type === 'copy') {
       const copied = await copyToClipboard(`${messageText} ${url}`)
       setShareStatus(copied ? 'Invitation link copied' : 'Copy failed. Please try again.')
       return
     }
-
     if (navigator.share) {
       await navigator.share({ title: `${wedding.bride.name} & ${wedding.groom.name} Wedding Invitation`, text: messageText, url })
       setShareStatus('Shared successfully')
       return
     }
-
     setShareStatus('Your browser does not support native share.')
   }
 
@@ -464,7 +298,6 @@ function App() {
       ],
       { type: 'text/calendar;charset=utf-8' },
     )
-
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
@@ -502,285 +335,17 @@ function App() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_40%)]" />
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[var(--brand-secondary)]/10 blur-3xl" />
       </div>
-
-      <nav className="fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-40 mx-auto flex h-[5rem] max-w-[calc(100%-1.5rem)] items-center justify-between rounded-full border border-white/10 bg-[var(--brand-primary-deep)]/90 px-3 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 sm:h-16 md:h-16 md:max-w-2xl md:px-5">
-        <a href="#home" className="flex items-center gap-2 min-w-0 flex-shrink-0 sm:gap-3 md:flex">
-          <Sparkles size={20} className="text-[var(--brand-secondary)] sm:text-[22px]" />
-          <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-secondary)] transition-transform duration-300 ease-out hover:translate-x-1 hover:scale-[1.1] sm:text-[10px] md:text-[11px]">Invitation</span>
-        </a>
-        <div className="flex flex-1 items-center justify-evenly gap-1 sm:gap-2 md:gap-4">
-          {navItems.map((item) => {
-            const Icon = navIcons[item.label as keyof typeof navIcons]
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                aria-label={item.label}
-                className="group relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--brand-secondary)] transition-all duration-300 ease-out hover:scale-110 hover:bg-[var(--brand-secondary)]/10"
-              >
-                <Icon
-                  size={18}
-                  strokeWidth={1.8}
-                  className="transition-transform duration-300 group-hover:scale-110"
-                />
-
-                {/* Tooltip */}
-                <span
-                  className="
-                    pointer-events-none
-                    absolute
-                    left-1/2
-                    bottom-[calc(100%-0.35rem)]
-                    z-[100]
-                    -translate-x-1/2
-                    translate-y-1
-                    whitespace-nowrap
-                    rounded-md
-                    border-[var(--brand-secondary)]
-                    bg-[var(--brand-primary-deep)]
-                    px-2.5
-                    py-1
-                    text-[8px]
-                    font-semibold
-                    uppercase
-                    tracking-[0.14em]
-                    text-[var(--brand-secondary)]
-                    opacity-0
-                    shadow-lg
-                    transition-all
-                    duration-200
-                    group-hover:translate-y-0
-                    group-hover:opacity-100
-                  "
-                >
-                  {item.label}
-                </span>
-              </a>
-            )
-          })}
-        </div>
-
-        <div className="relative hidden items-center md:flex">
-          <div
-            onMouseEnter={() => setPaletteMenuOpen(true)}
-            onMouseLeave={() => setPaletteMenuOpen(false)}
-            onFocus={() => setPaletteMenuOpen(true)}
-            onBlur={() => setPaletteMenuOpen(false)}
-            className="relative"
-          >
-            <button
-              type="button"
-              aria-label="Palette options"
-              className="flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.22em] transition hover:opacity-90"
-              style={{
-                // background: `linear-gradient(135deg, ${activePalette.colors.primary} 0%, ${activePalette.colors.primarySoft} 100%)`,
-                color: activePalette.colors.secondary,
-              }}
-            ><Palette size={16} strokeWidth={2} />
-              {/* <span>Palette</span> */}
-              <ChevronDown size={12} />
-            </button>
-
-            <AnimatePresence>
-              {paletteMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.96 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  onMouseEnter={() => setPaletteMenuOpen(true)}
-                  onMouseLeave={() => setPaletteMenuOpen(false)}
-                  className="absolute right-0 top-[calc(100%+0.75rem)] flex items-center gap-2 rounded-full border border-[var(--brand-secondary)] p-2 shadow-[0_14px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl"
-                  style={{
-                    background: `linear-gradient(135deg, ${activePalette.colors.primaryDeep} 0%, ${activePalette.colors.primary} 100%)`,
-                  }}
-                >
-                  {paletteOptions.map((option) => (
-                    <button
-                      key={`hover-${option.id}`}
-                      type="button"
-                      aria-label={`Switch to ${option.name} palette`}
-                      onClick={() => {
-                        setActivePalette(option)
-                        setPaletteMenuOpen(false)
-                      }}
-                      title={option.name}
-                      className="h-5 w-5 rounded-full border border-white/50 transition hover:scale-110"
-                      style={{
-                        background: `linear-gradient(135deg, ${option.colors.secondary} 0%, ${option.colors.primary} 100%)`,
-                        boxShadow: activePalette.id === option.id ? `0 0 0 2px ${option.colors.secondarySoft}` : 'none',
-                      }}
-                    />
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        <div className="relative md:hidden">
-          <div
-            onMouseEnter={() => setPaletteMenuOpen(true)}
-            onMouseLeave={() => setPaletteMenuOpen(false)}
-            onFocus={() => setPaletteMenuOpen(true)}
-            onBlur={() => setPaletteMenuOpen(false)}
-            className="group relative"
-          >
-            <button
-              type="button"
-              aria-label="Palette"
-              title="Palette"
-              className="
-                relative
-                flex
-                h-9
-                w-9
-                items-center
-                justify-center
-                rounded-full
-                border
-                border-[var(--brand-secondary)]
-                text-[var(--brand-secondary)]
-                transition-all
-                duration-300
-                hover:scale-105
-                hover:bg-[var(--brand-secondary)]/10
-                focus:outline-none
-                focus:ring-1
-                focus:ring-[var(--brand-secondary)]/50
-              "
-            >
-              <Palette
-                size={17}
-                strokeWidth={2}
-              />
-<ChevronDown size={12}/>
-              {/* Tooltip INSIDE the header */}
-              <span
-                className="
-                  pointer-events-none
-                  absolute
-                  right-1/2
-                  top-1/2
-                  z-50
-                  mr-2
-                  -translate-y-1/2
-                  translate-x-[-100%]
-                  whitespace-nowrap
-                  rounded-full
-                  border
-                  border-[var(--brand-secondary)]
-                  bg-[var(--brand-primary-deep)]
-                  px-2.5
-                  py-1
-                  text-[8px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.2em]
-                  text-[var(--brand-secondary)]
-                  opacity-0
-                  shadow-lg
-                  transition-all
-                  duration-200
-                  group-hover:translate-x-[-105%]
-                  group-hover:opacity-100
-                "
-              >
-                Palette
-              </span>
-            </button>
-
-            <AnimatePresence>
-              {paletteMenuOpen && (
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                    y: 10,
-                    scale: 0.96,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    y: 10,
-                    scale: 0.96,
-                  }}
-                  transition={{
-                    duration: 0.18,
-                    ease: 'easeOut',
-                  }}
-                  onMouseEnter={() =>
-                    setPaletteMenuOpen(true)
-                  }
-                  onMouseLeave={() =>
-                    setPaletteMenuOpen(false)
-                  }
-                  className="
-                    absolute
-                    right-0
-                    top-[calc(100%+0.5rem)]
-                    z-50
-                    flex
-                    items-center
-                    gap-2
-                    rounded-full
-                    border
-                    border-[var(--brand-secondary)]
-                    bg-[var(--brand-primary-deep)]/95
-                    p-2
-                    shadow-[0_12px_24px_rgba(0,0,0,0.2)]
-                    backdrop-blur-xl
-                  "
-                >
-                  {paletteOptions.map((option) => (
-                    <button
-                      key={`mobile-hover-${option.id}`}
-                      type="button"
-                      aria-label={`Switch to ${option.name} palette`}
-                      onClick={() => {
-                        setActivePalette(option)
-                        setPaletteMenuOpen(false)
-                      }}
-                      title={option.name}
-                      className="
-                        h-5
-                        w-5
-                        shrink-0
-                        rounded-full
-                        border
-                        border-white/50
-                        transition
-                        hover:scale-110
-                      "
-                      style={{
-                        background: `linear-gradient(
-                          135deg,
-                          ${option.colors.secondary} 0%,
-                          ${option.colors.primary} 100%
-                        )`,
-                        boxShadow:
-                          activePalette.id === option.id
-                            ? `0 0 0 2px ${option.colors.secondarySoft}`
-                            : 'none',
-                      }}
-                    />
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </nav>
-
+      <Header
+      activePalette={activePalette}
+      setActivePalette={setActivePalette}
+      paletteMenuOpen={paletteMenuOpen}
+      setPaletteMenuOpen={setPaletteMenuOpen}
+    />
       <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-40 flex items-center justify-center">
         <button type="button" aria-label="Open menu" className="flex h-[3.1rem] w-[3.1rem] items-center justify-center rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)]/85 text-[#f7f2e7] shadow-lg shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-12 sm:w-12" onClick={() => setMenuOpen((value) => !value)}>
           <Menu size={18} />
         </button>
       </div>
-
       {/* Floating controls */}
       <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-6 z-40 flex flex-col items-center gap-3">
         <AnimatePresence>
@@ -873,38 +438,30 @@ function App() {
         <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-8">
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, ease: 'easeOut' }} className="relative w-full max-w-xl rounded-[2rem] border border-[var(--brand-secondary)]/30 bg-[var(--brand-primary-deep)]/95 p-4 text-[var(--brand-neutral)] shadow-[0_35px_90px_rgba(0,0,0,0.2)] sm:p-5 md:p-8">
             <div className="absolute inset-x-8 bottom-4 h-px bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
-
             <div className="relative text-center">
               <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7 }} className="font-[Georgia] font-bold text-[16px] tracking-[0.18em] text-[var(--brand-secondary)] sm:text-[20px] sm:tracking-[0.42em] md:text-[25px]">
                 بِسْمِ ٱللّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
               </motion.p>
-
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35, duration: 0.7 }} className="mt-5 flex items-center justify-center">
                 <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
               </motion.div>
-
               <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }} className="mt-6 font-[Georgia] text-[1.8rem] leading-none tracking-[0.08em] text-[var(--brand-secondary)] sm:text-[2.3rem] sm:tracking-[0.12em] md:text-[4rem]">
                 YOU&apos;RE INVITED
               </motion.h1>
-
               <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65, duration: 0.8 }} className="mt-4 font-[Georgia] text-base tracking-[0.28em] text-[var(--brand-neutral)]/80 md:mt-5 md:text-xl">
                 to the
               </motion.p>
-
               <motion.p initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.8 }} className="mt-4 font-[Georgia] text-3xl tracking-[0.08em] text-[var(--brand-neutral)] md:mt-5 md:text-6xl">
                 Nikah
               </motion.p>
-
               <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95, duration: 0.8 }} className="mt-5 space-y-1 text-[var(--brand-neutral)] sm:mt-6">
                 <div className="font-[Georgia] text-[1.7rem] tracking-[0.06em] text-[var(--brand-secondary)] sm:text-[2.1rem] md:text-[4rem]">{wedding.groom.name}</div>
                 <div className="text-xl text-[var(--brand-neutral)] md:text-3xl">&</div>
                 <div className="font-[Georgia] text-[1.7rem] tracking-[0.06em] text-[var(--brand-secondary)] sm:text-[2.1rem] md:text-[4rem]">{wedding.bride.name}</div>
               </motion.div>
-
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.7 }} className="mt-6 text-[10px] uppercase tracking-[0.32em] font-bold text-white sm:text-xs md:mt-8 md:text-sm md:tracking-[0.38em]">
                 {wedding.date.gregorian}
               </motion.p>
-
               <motion.button
                 type="button"
                 whileHover={{ scale: 1.02 }}
