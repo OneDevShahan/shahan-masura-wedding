@@ -15,7 +15,7 @@ import {
   VolumeX,
   X,
 } from 'lucide-react'
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useState } from 'react'
 import Header, {
   paletteOptions,
   type PaletteOption,
@@ -41,17 +41,14 @@ import {
   type VisitorLocation,
 } from './services/rsvpService'
 import {
-  getGoogleCalendarLink,
-  getIcsContent,
-} from './utils/calendar'
-import {
-  copyToClipboard,
-  getWhatsAppShareUrl,
-} from './utils/share'
-
-import {
-  formatWishDate
-} from './utils/DateUtils'
+  createWeddingCalendarUrl,
+  downloadWeddingIcs,
+  formatWishDate,
+  getPaletteFieldStyle,
+  getThemeStyle,
+  scrollToTop,
+  shareWeddingInvitation,
+} from './utils/Utility'
 
 function App() {
   const [isOpened, setIsOpened] = useState(false)
@@ -68,7 +65,8 @@ function App() {
   const [wishText, setWishText] = useState('')
   const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false)
   const [isSubmittingWish, setIsSubmittingWish] = useState(false)
-  const [visitorCount, setVisitorCount] = useState<number>(0)
+  const [visitorCount, setVisitorCount] = useState<number | null>(null)
+  const [toastCountdown, setToastCountdown] = useState(10)
   const [visitorLocations, setVisitorLocations] = useState<VisitorLocation[]>([])
   const [showTopButton, setShowTopButton] = useState(false)
   const [showWelcomeHint, setShowWelcomeHint] = useState(false)
@@ -80,47 +78,35 @@ function App() {
 
   useEffect(() => {
     let cancelled = false
-    const loadVisitorCount = async () => {
+
+    const loadVisitorData = async () => {
       try {
         const count = await registerVisitor()
+
         if (!cancelled) {
           setVisitorCount(count)
         }
-      } catch (error) {
-        console.error(
-          'Could not register visitor:',
-          error,
-        )
-        if (!cancelled) {
-          setVisitorCount(0)
-        }
-      }
-    }
-    void loadVisitorCount()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-  
-  useEffect(() => {
-    let cancelled = false
-    const loadVisitorLocations = async () => {
-      try {
+
         const locations = await getVisitorLocations()
+
         if (!cancelled) {
           setVisitorLocations(locations)
         }
       } catch (error) {
         console.error(
-          'Could not load visitor locations:',
+          'Could not load visitor data:',
           error,
         )
+
         if (!cancelled) {
+          setVisitorCount(null)
           setVisitorLocations([])
         }
       }
     }
-    void loadVisitorLocations()
+
+    void loadVisitorData()
+
     return () => {
       cancelled = true
     }
@@ -161,9 +147,26 @@ function App() {
     }
   }, [])
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  useEffect(() => {
+    if (!rsvpState) {
+      setToastCountdown(10)
+      return
+    }
+    setToastCountdown(10)
+    const timer = window.setInterval(() => {
+      setToastCountdown((prev) => {
+        if (prev <= 1) {
+          window.clearInterval(timer)
+          setRsvpState(null)
+          return 10
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => {
+      window.clearInterval(timer)
+    }
+  }, [rsvpState])
 
   const handleOpenInvitation = () => {
     setIsOpened(true)
@@ -242,95 +245,49 @@ function App() {
   const addWish = async () => {
     const cleanName = wishName.trim()
     const cleanText = wishText.trim()
-    if (!cleanName || !cleanText) return
+    if (!wishName.trim() || !wishText.trim()) {
+      setRsvpState({
+        success: false,
+        message: 'Please enter your name and wish.',
+        name: wishName || 'Guest',
+      })
+      return
+    }
     setIsSubmittingWish(true)
     try {
       await submitWish({name: cleanName,text: cleanText,})
       const updatedWishes = await getWishes()
       setWishes(updatedWishes)
+      setRsvpState({
+        success: true,
+        message: 'Your beautiful wish has been added. JazakAllah Khair!',
+        name: wishName.trim(),
+      })
       setWishName('')
       setWishText('')
     } catch (error) {
-      const messageText = error instanceof Error ? error.message : 'Could not save your wish. Please try again.'
-      setRsvpState({ success: false, name: '', message: messageText })
+      console.error('Could not submit wish:', error)
+      setRsvpState({
+        success: false,
+        message: 'Could not add your wish. Please try again.',
+        name: wishName.trim() || 'Guest',
+      })
     } finally {
       setIsSubmittingWish(false)
     }
   }
 
-  const handleShare = async (type: 'whatsapp' | 'copy' | 'native') => {
-    const messageText = `${wedding.share.message} ${wedding.bride.name} & ${wedding.groom.name}`
-    const url = window.location.href
-    if (type === 'whatsapp') {
-      window.open(getWhatsAppShareUrl(`${messageText} ${url}`), '_blank', 'noopener,noreferrer')
-      setShareStatus('WhatsApp share opened')
-      return
-    }
-    if (type === 'copy') {
-      const copied = await copyToClipboard(`${messageText} ${url}`)
-      setShareStatus(copied ? 'Invitation link copied' : 'Copy failed. Please try again.')
-      return
-    }
-    if (navigator.share) {
-      await navigator.share({ title: `${wedding.bride.name} & ${wedding.groom.name} Wedding Invitation`, text: messageText, url })
-      setShareStatus('Shared successfully')
-      return
-    }
-    setShareStatus('Your browser does not support native share.')
+  const handleShare = async (
+    type: 'whatsapp' | 'copy' | 'native',
+  ) => {
+    const status = await shareWeddingInvitation(type)
+    setShareStatus(status)
   }
 
-  const calendarUrl = getGoogleCalendarLink(
-    wedding.date.iso,
-    `${wedding.bride.name} & ${wedding.groom.name} | Nikah Celebration`,
-    'A beautiful evening of joy, faith, and celebration.',
-    `${wedding.venue.name}, ${wedding.venue.address}, ${wedding.venue.city}, ${wedding.venue.country}`,
-  )
-
-  const handleIcsDownload = () => {
-    const blob = new Blob(
-      [
-        getIcsContent(
-          wedding.date.iso,
-          'Nikah Celebration',
-          'Wedding invitation event',
-          `${wedding.venue.name}, ${wedding.venue.address}, ${wedding.venue.city}, ${wedding.venue.country}`,
-        ),
-      ],
-      { type: 'text/calendar;charset=utf-8' },
-    )
-    const url = URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = 'wedding-invitation.ics'
-    anchor.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const themeStyle = {
-    '--brand-primary': activePalette.colors.primary,
-    '--brand-primary-deep': activePalette.colors.primaryDeep,
-    '--brand-primary-soft': activePalette.colors.primarySoft,
-    '--brand-secondary': activePalette.colors.secondary,
-    '--brand-secondary-soft': activePalette.colors.secondarySoft,
-    '--brand-neutral': activePalette.colors.neutral,
-    '--brand-neutral-soft': activePalette.colors.neutralSoft,
-    '--surface-dark': activePalette.colors.primary,
-    '--surface-dark-strong': activePalette.colors.primaryDeep,
-    '--surface-light': activePalette.colors.neutral,
-    '--surface-light-soft': activePalette.colors.neutralSoft,
-    '--text-dark': activePalette.colors.primaryDeep,
-    '--text-muted': activePalette.colors.primarySoft,
-    '--text-light': activePalette.colors.neutral,
-  } as CSSProperties
-
-  const paletteFieldStyle = {
-    backgroundColor: activePalette.colors.primary,
-    borderColor: activePalette.colors.secondary,
-    color: activePalette.colors.neutral,
-  } as CSSProperties
+  const calendarUrl = createWeddingCalendarUrl()
 
   return (
-    <div style={themeStyle} className="min-h-screen bg-[radial-gradient(circle_at_top,var(--brand-primary-soft)_0%,var(--brand-primary)_35%,var(--brand-primary-deep)_100%)] text-[#f7f2e7] antialiased selection:bg-[var(--brand-secondary)]/30">
+    <div style={getThemeStyle(activePalette)} className="min-h-screen bg-[radial-gradient(circle_at_top,var(--brand-primary-soft)_0%,var(--brand-primary)_35%,var(--brand-primary-deep)_100%)] text-[#f7f2e7] antialiased selection:bg-[var(--brand-secondary)]/30">
       <div className="fixed inset-0 opacity-60" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_40%)]" />
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[var(--brand-secondary)]/10 blur-3xl" />
@@ -376,7 +333,7 @@ function App() {
         <WeddingInfo
           rsvpCount={rsvpCount}
           wishesCount={wishes.length}
-          visitorCount={visitorCount ?? 0}
+          visitorCount={visitorCount}
           visitorLocations={visitorLocations}
         />
       </div>
@@ -657,7 +614,7 @@ function App() {
                       <button type="button" onClick={() => window.open(calendarUrl, '_blank', 'noopener,noreferrer')} className="rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/5 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-neutral)]/5 hover:text-[var(--brand-neutral)]">
                         Google Calendar
                       </button>
-                      <button type="button" onClick={handleIcsDownload} className="rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/5 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-neutral)]/5 hover:text-[var(--brand-neutral)]">
+                      <button type="button" onClick={downloadWeddingIcs} className="rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/5 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-[0_10px_20px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-neutral)]/5 hover:text-[var(--brand-neutral)]">
                         Download .ics
                       </button>
                     </div>
@@ -678,7 +635,7 @@ function App() {
                     <div className="mt-6 space-y-5">
                       <div>
                         <label htmlFor="guestName" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Your Name</label>
-                        <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
+                        <input id="guestName" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Enter your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none ring-0 placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={getPaletteFieldStyle(activePalette)} />
                       </div>
                       <div>
                         <p className="mb-2 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Will you be attending?</p>
@@ -757,7 +714,7 @@ function App() {
 
                       <div>
                         <label htmlFor="message" className="mb-2 block text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)]">Leave a message for the couple</label>
-                        <textarea id="message" value={message} onChange={(event) => setMessage(event.target.value)} rows={4} placeholder="Your message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={paletteFieldStyle} />
+                        <textarea id="message" value={message} onChange={(event) => setMessage(event.target.value)} rows={4} placeholder="Your message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)] focus:border-[var(--brand-secondary)]" style={getPaletteFieldStyle(activePalette)} />
                       </div>
 
                       <button
@@ -811,8 +768,8 @@ function App() {
                     </div>
 
                     <div className="mt-8 space-y-3">
-                      <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
-                      <textarea value={wishText} onChange={(event) => setWishText(event.target.value)} rows={3} placeholder="Leave a dua or message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={paletteFieldStyle} />
+                      <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Your name" className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={getPaletteFieldStyle(activePalette)} />
+                      <textarea value={wishText} onChange={(event) => setWishText(event.target.value)} rows={3} placeholder="Leave a dua or message..." className="w-full rounded-2xl border px-4 py-3 text-base outline-none placeholder:text-[var(--brand-primary-soft)]" style={getPaletteFieldStyle(activePalette)} />
                       <button
                         type="button"
                         onClick={addWish}
@@ -870,15 +827,58 @@ function App() {
                   </h4>
                   <p className="mt-2 text-sm leading-6" style={{ color: activePalette.colors.secondarySoft }}>{rsvpState.message}</p>
                 </div>
+               <div className="relative h-9 w-9 shrink-0">
+                {/* Countdown ring */}
+                <svg
+                  className="absolute inset-0 h-9 w-9 -rotate-90"
+                  viewBox="0 0 36 36"
+                  aria-hidden="true"
+                >
+                  {/* Background ring */}
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke={activePalette.colors.secondary}
+                    strokeOpacity="0.15"
+                    strokeWidth="1.5"
+                  />
+
+                  {/* Countdown ring */}
+                  <motion.circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke={activePalette.colors.secondary}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 15}
+                    animate={{
+                      strokeDashoffset:
+                        2 * Math.PI * 15 * (1 - toastCountdown / 10),
+                    }}
+                    transition={{
+                      duration: 0.85,
+                      ease: 'linear',
+                    }}
+                  />
+                </svg>
+
+                {/* Close button */}
                 <button
                   type="button"
-                  aria-label="Dismiss RSVP notification"
+                  aria-label={`Dismiss notification. Closes automatically in ${toastCountdown} seconds.`}
                   onClick={() => setRsvpState(null)}
-                  className="rounded-full border p-2"
-                  style={{ borderColor: activePalette.colors.secondary, color: activePalette.colors.neutral }}
+                  className="absolute inset-1 flex items-center justify-center rounded-full transition-transform duration-200 hover:bg-white/5 active:scale-90"
+                  style={{
+                    color: activePalette.colors.neutral,
+                  }}
                 >
                   <X size={14} />
                 </button>
+              </div>
               </div>
             </motion.div>
           )}

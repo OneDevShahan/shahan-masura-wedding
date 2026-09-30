@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Info, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type VisitorLocation = {
   city: string
@@ -12,7 +12,7 @@ type VisitorLocation = {
 type WeddingInfoProps = {
   rsvpCount: number
   wishesCount: number
-  visitorCount: number
+  visitorCount: number | null
   visitorLocations: VisitorLocation[]
 }
 
@@ -23,6 +23,27 @@ export default function WeddingInfo({
   visitorLocations,
 }: WeddingInfoProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [countdown, setCountdown] = useState(10)
+  useEffect(() => {
+    if (!isOpen) {
+      setCountdown(10)
+      return
+    }
+
+    const timer = window.setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          window.clearInterval(timer)
+          setIsOpen(false)
+          return 10
+        }
+
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [isOpen])
 
   const closeInfo = () => {
     setIsOpen(false)
@@ -273,7 +294,7 @@ export default function WeddingInfo({
 
 type InfoRowProps = {
   label: string
-  value: number
+  value: number | null
 }
 
 function InfoRow({

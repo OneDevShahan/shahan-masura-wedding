@@ -369,76 +369,52 @@ async function hashIp(
  * Existing visitors are NOT updated.
  */
 export async function registerVisitor(): Promise<number> {
-  const firestore =
-    ensureDb()
+  const firestore = ensureDb()
 
-  const ip =
-    await getVisitorIp()
+  const ip = await getVisitorIp()
+  const ipHash = await hashIp(ip)
 
-  const ipHash =
-    await hashIp(ip)
+  const visitorRef = doc(
+    firestore,
+    'visitors',
+    ipHash,
+  )
 
-  const visitorRef =
-    doc(
-      firestore,
-      'visitors',
-      ipHash,
-    )
+  const statsRef = doc(
+    firestore,
+    'stats',
+    'visitors',
+  )
 
-  const statsRef =
-    doc(
-      firestore,
-      'stats',
-      'visitors',
-    )
+  const visitorSnapshot = await getDoc(visitorRef)
 
-  const visitorSnapshot =
-    await getDoc(visitorRef)
+  if (!visitorSnapshot.exists()) {
+    let location: VisitorLocation | null = null
 
-  let location:
-    | VisitorLocation
-    | null = null
+    try {
+      location = await getVisitorLocation(ip)
+    } catch (error) {
+      console.warn(
+        'Could not determine visitor location:',
+        error,
+      )
+    }
 
-  try {
-    location =
-      await getVisitorLocation(ip)
-  } catch (error) {
-    console.warn(
-      'Could not determine visitor location:',
-      error,
-    )
-  }
+    await setDoc(visitorRef, {
+      firstSeen: new Date().toISOString(),
 
-  /*
-   * Only CREATE new visitor documents.
-   *
-   * Existing visitors are not updated.
-   */
-  if (
-    !visitorSnapshot.exists()
-  ) {
-    await setDoc(
-      visitorRef,
-      {
-        firstSeen:
-          new Date().toISOString(),
-
-        ...(location
-          ? {
-              location,
-            }
-          : {}),
-      },
-    )
+      ...(location
+        ? {
+            location,
+          }
+        : {}),
+    })
 
     await setDoc(
       statsRef,
       {
-        count:
-          increment(1),
-
-        updatedAt:
-          new Date().toISOString(),
+        count: increment(1),
+        updatedAt: new Date().toISOString(),
       },
       {
         merge: true,
@@ -446,14 +422,13 @@ export async function registerVisitor(): Promise<number> {
     )
   }
 
-  const statsSnapshot =
-    await getDoc(statsRef)
+  const statsSnapshot = await getDoc(statsRef)
 
-  return Number(
-    statsSnapshot
-      .data()
-      ?.count ?? 0,
+  const count = Number(
+    statsSnapshot.data()?.count ?? 0,
   )
+
+  return count
 }
 
 /**
