@@ -23,6 +23,7 @@ import Header, {
 import WeddingInfo from './components/WeddingInfo'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
 import { Ornament } from './components/decorations/Ornament'
+import WeddingCelebration from './components/wedding/WeddingCelebration'
 import {
   initialWishes,
   navItems,
@@ -303,6 +304,10 @@ function App() {
 
   return (
     <div style={getThemeStyle(activePalette)} className="min-h-screen bg-[radial-gradient(circle_at_top,var(--brand-primary-soft)_0%,var(--brand-primary)_35%,var(--brand-primary-deep)_100%)] text-[#f7f2e7] antialiased selection:bg-[var(--brand-secondary)]/30">
+      <WeddingCelebration
+        stage={weddingStage.stage.stage}
+        active={isOpened}
+      />
       <div className="fixed inset-0 opacity-60" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_40%)]" />
         <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[var(--brand-secondary)]/10 blur-3xl" />
