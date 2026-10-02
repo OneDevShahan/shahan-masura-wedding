@@ -28,9 +28,10 @@ import {
   navItems,
   wedding,
 } from './data/wedding'
-import type { DisplayWish } from './types/wedding'
 import { useCountdown } from './hooks/useCountdown'
 import { useMusic } from './hooks/useMusic'
+import { useWeddingStage } from './hooks/useWeddingStage'
+import WeddingCountdown from './components/wedding/WeddingCountdown'
 import {
   getRSVPCount,
   getVisitorLocations,
@@ -40,6 +41,7 @@ import {
   submitWish,
   type VisitorLocation,
 } from './services/rsvpService'
+import type { DisplayWish } from './types/wedding'
 import {
   createWeddingCalendarUrl,
   downloadWeddingIcs,
@@ -73,8 +75,21 @@ function App() {
   const [invitationState, setInvitationState] = useState<'idle' | 'welcome'>('idle')
   const [activePalette, setActivePalette] = useState<PaletteOption>(paletteOptions[0])
   const [paletteMenuOpen, setPaletteMenuOpen] = useState(false)
-  const countdown = useCountdown(wedding.date.iso)
   const music = useMusic(wedding.music.src, wedding.music.enabled)
+  const weddingStage = useWeddingStage()
+
+  const countdownTarget =
+    weddingStage.stage.stage === 'upcoming'
+      ? wedding.date.iso
+      : weddingStage.stage.stage === 'walima-day'
+        ? wedding.date.walimaIso
+        : wedding.date.iso
+
+  const countdown = useCountdown(
+    countdownTarget,
+    weddingStage.currentDate,
+  )
+
 
   useEffect(() => {
     let cancelled = false
@@ -416,8 +431,24 @@ function App() {
                 <div className="text-xl text-[var(--brand-neutral)] md:text-3xl">&</div>
                 <div className="font-[Georgia] text-[1.7rem] tracking-[0.06em] text-[var(--brand-secondary)] sm:text-[2.1rem] md:text-[4rem]">{wedding.bride.name}</div>
               </motion.div>
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.7 }} className="mt-6 text-[10px] uppercase tracking-[0.32em] font-bold text-white sm:text-xs md:mt-8 md:text-sm md:tracking-[0.38em]">
+              {/* <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.7 }} className="mt-6 text-[10px] uppercase tracking-[0.32em] font-bold text-white sm:text-xs md:mt-8 md:text-sm md:tracking-[0.38em]">
                 {wedding.date.gregorian}
+              </motion.p> */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.1, duration: 0.7 }}
+                className="mt-6 text-[10px] uppercase tracking-[0.32em] font-bold text-white sm:text-xs md:mt-8 md:text-sm md:tracking-[0.38em]"
+              >
+                {weddingStage.stage.stage === 'upcoming'
+                  ? wedding.date.gregorian
+                  : weddingStage.stage.stage === 'baraat-day'
+                    ? 'Today — 31 October 2026'
+                    : weddingStage.stage.stage === 'walima-day'
+                      ? wedding.date.secondDay
+                      : weddingStage.stage.stage === 'walima-celebration'
+                        ? 'Dawat-e-Walima — 1 November 2026'
+                        : 'Celebration Complete'}
               </motion.p>
               <motion.button
                 type="button"
@@ -428,7 +459,12 @@ function App() {
                 onClick={handleOpenInvitation}
                 className="mt-7 inline-flex items-center gap-3 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-3 text-xs font-medium tracking-[0.18em] text-[#f6f0e3] shadow-lg shadow-black/20 transition sm:px-6 sm:text-sm sm:tracking-[0.2em] md:mt-8"
               >
-                {invitationState === 'welcome' ? 'Welcome' : 'Open Invitation'}
+                {/* {invitationState === 'welcome' ? 'Welcome' : 'Open Invitation'} */}
+                {invitationState === 'welcome'
+                  ? 'Welcome'
+                  : weddingStage.stage.stage === 'after-event'
+                    ? 'View Celebration'
+                    : 'Open Invitation'}
                 <ArrowRight size={16} />
               </motion.button>
 
@@ -473,26 +509,27 @@ function App() {
 
               <section className="relative">
                 <div className="mb-10 text-center">
-                  <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)] md:text-5xl">Counting Down To Our Big Day</h3>
+                  <h3 className="font-[Georgia] text-3xl text-[var(--brand-secondary)] md:text-5xl">
+                    {weddingStage.stage.stage === 'upcoming'
+                      ? 'Counting Down To Our Big Day'
+                      : weddingStage.stage.stage === 'baraat-day'
+                        ? 'Today Is The Day'
+                        : weddingStage.stage.stage === 'walima-day'
+                          ? 'Counting Down To Dawat-e-Walima'
+                          : weddingStage.stage.stage === 'walima-celebration'
+                            ? 'Dawat-e-Walima'
+                            : 'A Beautiful Celebration'}
+                  </h3>
+
                   <div className="mt-4 flex justify-center">
                     <div className="h-px w-28 bg-gradient-to-r from-transparent via-[var(--brand-secondary)] to-transparent" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                  {[
-                    { label: 'Days', value: countdown.days },
-                    { label: 'Hours', value: countdown.hours },
-                    { label: 'Minutes', value: countdown.minutes },
-                    { label: 'Seconds', value: countdown.seconds },
-                  ].map((item) => (
-                    <motion.div key={item.label} initial={{ opacity: 0, scale: 0.88, filter: 'blur(8px)' }} whileInView={{ opacity: 1, scale: 1, filter: 'blur(0px)' }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity, filter' }} className="rounded-[1.5rem] border border-[var(--brand-secondary)]/30 bg-[var(--brand-neutral)]/10 p-4 text-center shadow-lg backdrop-blur-sm md:p-6">
-                      <motion.div key={`${item.label}-${item.value}`} initial={{ scale: 0.8, opacity: 0.7 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }} className="font-[Georgia] text-4xl text-[var(--brand-neutral)] md:text-6xl">
-                        {String(item.value).padStart(2, '0')}
-                      </motion.div>
-                      <p className="mt-3 text-[10px] uppercase tracking-[0.4em] text-[var(--brand-secondary)] md:text-xs">{item.label}</p>
-                    </motion.div>
-                  ))}
-                </div>
+
+                <WeddingCountdown
+                  countdown={countdown}
+                  stage={weddingStage.stage.stage}
+                />
               </section>
 
               <section id="events" className="relative">
