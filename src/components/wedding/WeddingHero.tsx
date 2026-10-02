@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+import { wedding } from '../../data/weddingConfig'
 import type { WeddingStage } from '../../utils/weddingStage'
-import { wedding } from '../../data/wedding'
 
 type WeddingHeroProps = {
   stage: WeddingStage

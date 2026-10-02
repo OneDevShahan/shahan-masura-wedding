@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 
 import type { PaletteOption } from '../components/Header'
-import { wedding } from '../data/wedding'
+import { wedding } from '../data/weddingConfig'
 
 /* -------------------------------------------------------------------------- */
 /* General Utilities                                                          */
@@ -40,14 +40,14 @@ export function formatWishDate(date?: Date | null) {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    timeZone: 'Asia/Kolkata'
+    timeZone: 'Asia/Kolkata',
   })
 
   const timePart = date.toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
-    timeZone: 'Asia/Kolkata'
+    timeZone: 'Asia/Kolkata',
   })
 
   return `${day}${suffix} ${datePart.split(' ').slice(1).join(' ')} · ${timePart} IST`
@@ -58,7 +58,7 @@ export function formatWishDate(date?: Date | null) {
 /* -------------------------------------------------------------------------- */
 
 export function getWeddingShareMessage() {
-  return `${wedding.share.message} ${wedding.bride.name} & ${wedding.groom.name}`
+  return `${wedding.share.message} ${wedding.groom.name} & ${wedding.bride.name}`
 }
 
 export function getWhatsAppShareUrl(message: string) {
@@ -100,7 +100,7 @@ export async function shareWeddingInvitation(
 
   if (navigator.share) {
     await navigator.share({
-      title: `${wedding.bride.name} & ${wedding.groom.name} Wedding Invitation`,
+      title: `${wedding.groom.name} & ${wedding.bride.name} Wedding Invitation`,
       text: message,
       url,
     })
@@ -175,7 +175,7 @@ export function getIcsContent(
 export function createWeddingCalendarUrl() {
   return getGoogleCalendarLink(
     wedding.date.iso,
-    `${wedding.bride.name} & ${wedding.groom.name} | Nikah Celebration`,
+    `${wedding.groom.name} & ${wedding.bride.name} | Nikah Celebration`,
     'A beautiful evening of joy, faith, and celebration.',
     `${wedding.venue.name}, ${wedding.venue.address}, ${wedding.venue.city}, ${wedding.venue.country}`,
   )
@@ -186,7 +186,7 @@ export function downloadWeddingIcs() {
     [
       getIcsContent(
         wedding.date.iso,
-        'Nikah Celebration',
+        `${wedding.groom.name} & ${wedding.bride.name} | Nikah Celebration`,
         'Wedding invitation event',
         `${wedding.venue.name}, ${wedding.venue.address}, ${wedding.venue.city}, ${wedding.venue.country}`,
       ),

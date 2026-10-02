@@ -24,15 +24,15 @@ import WeddingInfo from './components/WeddingInfo'
 import { BrideGroomIllustration } from './components/decorations/BrideGroomIllustration'
 import { Ornament } from './components/decorations/Ornament'
 import WeddingCelebration from './components/wedding/WeddingCelebration'
+import WeddingCountdown from './components/wedding/WeddingCountdown'
 import {
   initialWishes,
   navItems,
   wedding,
-} from './data/wedding'
+} from './data/weddingConfig'
 import { useCountdown } from './hooks/useCountdown'
 import { useMusic } from './hooks/useMusic'
 import { useWeddingStage } from './hooks/useWeddingStage'
-import WeddingCountdown from './components/wedding/WeddingCountdown'
 import {
   getRSVPCount,
   getVisitorLocations,

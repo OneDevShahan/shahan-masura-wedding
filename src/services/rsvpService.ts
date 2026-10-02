@@ -11,7 +11,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 
-import { initialWishes, type WishMessage } from '../data/wedding'
+import { initialWishes, type WishMessage } from '../data/weddingConfig'
 import { db } from '../lib/firebase'
 
 export type RSVPStatus = 'yes' | 'no'

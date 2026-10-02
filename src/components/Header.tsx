@@ -10,7 +10,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import type { Dispatch, SetStateAction } from 'react'
-import { navItems } from '../data/wedding'
+import { navItems } from '../data/weddingConfig'
 
 export type PaletteOption = {
   id: string
@@ -308,6 +308,8 @@ export default function Header({
                 -bottom-0.5
                 rounded-full
                 bg-[var(--brand-primary-deep)]
+                border
+                border-[var(--brand-secondary)]
               "
             />
 
@@ -478,6 +480,8 @@ export default function Header({
                 -bottom-0.5
                 rounded-full
                 bg-[var(--brand-primary-deep)]
+                border
+                border-[var(--brand-secondary)]
               "
             />
 
