@@ -307,6 +307,7 @@ function App() {
       <WeddingCelebration
         stage={weddingStage.stage.stage}
         active={isOpened}
+        celebrationColor={activePalette.colors.secondary}
       />
       <div className="fixed inset-0 opacity-60" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_40%)]" />
