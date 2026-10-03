@@ -1,4 +1,5 @@
-import ashaduallaha from '/ashaduallaha.mp3'
+//import ashaduallaha from '/ashaduallaha.mp3'
+import mawla_ya_salli_wa from '/music/mawla_ya_salli_wa.mp3'
 
 export type WeddingEvent = {
   name: string
@@ -174,7 +175,7 @@ export const wedding = {
 
   music: {
     enabled: true,
-    src: ashaduallaha,
+    src: mawla_ya_salli_wa,
   },
 
   share: {
