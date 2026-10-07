@@ -772,7 +772,7 @@ function App() {
                             Sending...
                           </>
                         ) : (
-                          'Send RSVP'
+                          '💌Confirm Your Presence'
                         )}
                       </button>
                     </div>
@@ -817,7 +817,7 @@ function App() {
                         type="button"
                         onClick={addWish}
                         disabled={isSubmittingWish}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-neutral)]/10 px-4 py-3 text-sm uppercase tracking-[0.22em] text-[var(--brand-neutral)] transition-all duration-300 ease-out hover:scale-[1.025] hover:border-[var(--brand-secondary)] disabled:cursor-not-allowed disabled:opacity-75"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--brand-secondary)] bg-[var(--brand-primary)] px-5 py-4 text-sm uppercase tracking-[0.24em] text-[var(--brand-neutral)] shadow-lg shadow-black/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-neutral)] disabled:cursor-not-allowed disabled:opacity-75"
                       >
                         {isSubmittingWish ? (
                           <>
@@ -825,7 +825,7 @@ function App() {
                             Saving...
                           </>
                         ) : (
-                          'Add Wish'
+                          '💕Leave Your Blessings'
                         )}
                       </button>
                     </div>
