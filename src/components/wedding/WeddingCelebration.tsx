@@ -33,7 +33,7 @@ const WALIMA_COLORS = [
   '#FF8C00',
 ]
 
-const BURST_INTERVAL = 10000
+const BURST_INTERVAL = 15000
 
 export default function WeddingCelebration({
   stage,
@@ -54,8 +54,16 @@ export default function WeddingCelebration({
 
   const [burstKey, setBurstKey] = useState(0)
 
-  const isWeddingDay =
-    stage === 'baraat-day'
+  /*
+   * Set this to true only when confetti should appear
+   * exclusively on the Baraat and Walima days.
+   *
+   * It defaults to false so confetti remains enabled on
+   * every day the invitation is opened.
+   */
+  const restrictConfettiToWeddingDays = false
+
+  const isWeddingDay = stage === 'baraat-day'
 
   const isWalima =
     stage === 'walima-day' ||
@@ -63,7 +71,9 @@ export default function WeddingCelebration({
 
   const celebrationEnabled =
     active &&
-    (isWeddingDay || isWalima)
+    (!restrictConfettiToWeddingDays ||
+      isWeddingDay ||
+      isWalima)
 
   /*
    * Keep confetti sized to the viewport.
@@ -94,7 +104,7 @@ export default function WeddingCelebration({
   }, [])
 
   /*
-   * Start a new confetti burst every 10 seconds.
+   * Start a new confetti burst every 15 seconds.
    *
    * We don't hide the previous burst.
    * The previous pieces are allowed to
@@ -121,7 +131,7 @@ export default function WeddingCelebration({
     return null
   }
 
-  const baseColors = isWeddingDay
+  const baseColors = stage === 'baraat-day'
     ? WEDDING_COLORS
     : WALIMA_COLORS
 
