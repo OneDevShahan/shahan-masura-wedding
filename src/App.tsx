@@ -86,10 +86,7 @@ function App() {
         ? wedding.date.walimaIso
         : wedding.date.iso
 
-  const countdown = useCountdown(
-    countdownTarget,
-    weddingStage.currentDate,
-  )
+  const countdown = useCountdown(countdownTarget)
 
 
   useEffect(() => {
