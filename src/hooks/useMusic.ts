@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 
 export function useMusic(src: string, enabled: boolean) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const shouldResumeRef = useRef(false)
+  const resumeAttemptRef = useRef(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isReady, setIsReady] = useState(false)
 
@@ -48,13 +50,9 @@ export function useMusic(src: string, enabled: boolean) {
       return
     }
 
-    const storedPreference = window.sessionStorage.getItem('wedding-music')
-    if (storedPreference === 'on') {
-      setIsPlaying(true)
-    }
-
     return () => {
       audio.pause()
+      shouldResumeRef.current = false
       audio.removeAttribute('src')
       audio.load()
       audioRef.current = null
@@ -62,6 +60,53 @@ export function useMusic(src: string, enabled: boolean) {
       setIsReady(false)
     }
   }, [enabled, src])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const handleVisibilityOrFocus = () => {
+      const audio = audioRef.current
+      const isAway =
+        document.visibilityState === 'hidden' || !document.hasFocus()
+
+      if (isAway) {
+        audio?.pause()
+        return
+      }
+
+      if (
+        !audio ||
+        !shouldResumeRef.current ||
+        !audio.paused ||
+        resumeAttemptRef.current
+      ) {
+        return
+      }
+
+      resumeAttemptRef.current = true
+      void audio.play().catch((error: unknown) => {
+        setIsPlaying(false)
+        console.warn('Audio could not resume automatically:', error)
+      }).finally(() => {
+        resumeAttemptRef.current = false
+        if (!shouldResumeRef.current) {
+          audio.pause()
+        }
+      })
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus)
+    window.addEventListener('blur', handleVisibilityOrFocus)
+    window.addEventListener('focus', handleVisibilityOrFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus)
+      window.removeEventListener('blur', handleVisibilityOrFocus)
+      window.removeEventListener('focus', handleVisibilityOrFocus)
+    }
+  }, [])
 
   const toggle = async () => {
     const audio = ensureAudio()
@@ -72,10 +117,12 @@ export function useMusic(src: string, enabled: boolean) {
     if (audio.paused) {
       try {
         audio.load()
+        shouldResumeRef.current = true
         await audio.play()
         setIsPlaying(true)
         window.sessionStorage.setItem('wedding-music', 'on')
       } catch (error) {
+        shouldResumeRef.current = false
         console.warn('Audio playback failed on mobile:', error)
         setIsPlaying(false)
         window.sessionStorage.setItem('wedding-music', 'off')
@@ -83,6 +130,7 @@ export function useMusic(src: string, enabled: boolean) {
       return
     }
 
+    shouldResumeRef.current = false
     audio.pause()
     setIsPlaying(false)
     window.sessionStorage.setItem('wedding-music', 'off')
