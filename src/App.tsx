@@ -348,12 +348,14 @@ function App() {
           {music.isPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </button>
 
-        <WeddingInfo
-          rsvpCount={rsvpCount}
-          wishesCount={wishes.length}
-          visitorCount={visitorCount}
-          visitorLocations={visitorLocations}
-        />
+        {isOpened && (
+          <WeddingInfo
+            rsvpCount={rsvpCount}
+            wishesCount={wishes.length}
+            visitorCount={visitorCount}
+            visitorLocations={visitorLocations}
+          />
+        )}
       </div>
 
       <AnimatePresence>

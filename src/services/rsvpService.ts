@@ -455,11 +455,16 @@ export async function getVisitorLocations(): Promise<
         ),
       )
 
-    const locations:
-      VisitorLocation[] = []
+    const locations: {
+      location: VisitorLocation
+      firstSeen: number
+      index: number
+    }[] = []
+    let index = 0
 
     snapshot.forEach(
       (document) => {
+        const snapshotIndex = index++
         const data =
           document.data()
 
@@ -502,42 +507,54 @@ export async function getVisitorLocations(): Promise<
         }
 
         locations.push({
-          city:
-            city || 'Unknown',
+          location: {
+            city:
+              city || 'Unknown',
 
-          region:
-            region || 'Unknown',
+            region:
+              region || 'Unknown',
 
-          country:
-            country || 'Unknown',
+            country:
+              country || 'Unknown',
 
-          countryCode:
-            countryCode ||
-            'Unknown',
+            countryCode:
+              countryCode ||
+              'Unknown',
+          },
+          firstSeen: Date.parse(
+            String(data.firstSeen ?? ''),
+          ),
+          index: snapshotIndex,
         })
       },
     )
 
-    /*
-     * Remove duplicate locations.
-     */
-    const uniqueLocations =
-      Array.from(
-        new Map(
-          locations.map(
-            (location) => [
-              [
-                location.city,
-                location.region,
-                location.country,
-              ].join('|'),
-              location,
-            ],
-          ),
-        ).values(),
-      )
+    locations.sort((first, second) => {
+      const firstTimestamp = Number.isNaN(first.firstSeen)
+        ? Number.NEGATIVE_INFINITY
+        : first.firstSeen
+      const secondTimestamp = Number.isNaN(second.firstSeen)
+        ? Number.NEGATIVE_INFINITY
+        : second.firstSeen
 
-    return uniqueLocations
+      return secondTimestamp - firstTimestamp || first.index - second.index
+    })
+
+    const uniqueLocations = new Map<string, VisitorLocation>()
+
+    locations.forEach(({ location }) => {
+      const key = [
+        location.city,
+        location.region,
+        location.country,
+      ].join('|')
+
+      if (!uniqueLocations.has(key)) {
+        uniqueLocations.set(key, location)
+      }
+    })
+
+    return Array.from(uniqueLocations.values())
   } catch (error) {
     console.error(
       'Could not load visitor locations:',
